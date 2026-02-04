@@ -1,0 +1,54 @@
+services:
+  acestep-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: acestep-ui
+    ports:
+      - "7860:7860"
+    volumes:
+      # Mount checkpoints directory for model persistence
+      - ./checkpoints:/app/checkpoints
+      # Mount output directory for generated audio
+      - ./outputs:/app/outputs
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    command: ["uv", "run", "acestep", "--server-name", "0.0.0.0", "--port", "7860"]
+
+  acestep-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: acestep-api
+    ports:
+      - "8001:8001"
+    volumes:
+      # Mount checkpoints directory for model persistence
+      - ./checkpoints:/app/checkpoints
+      # Mount output directory for generated audio
+      - ./outputs:/app/outputs
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    command: ["uv", "run", "acestep-api"]
+    profiles:
+      - api
+
+volumes:
+  checkpoints:
+  outputs:

@@ -1,0 +1,62 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info
+dist
+build
+.venv
+.ENV
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.uv/
+
+# IDEs
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ACE-Step specific
+checkpoints/
+outputs/
+*.log
+*.mp3
+*.wav
+*.flac
+*.ogg
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Assets
+assets/
+
+# Scripts
+scripts/
+examples/
+openrouter/
+
+# Test files
+test/
+tests/
+*.test.py
+
+# Misc
+.env
+*.bak
+.cache
