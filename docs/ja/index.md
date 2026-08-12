@@ -4,9 +4,6 @@ hero:
   name: ACE-Step Forge
   text: 生成したテイクを、きちんと残して使う。
   tagline: ACE-Step 1.5 のローカル音楽生成、共有 Library、そしてコーディングエージェント用 MCP をひとつにまとめたワークスペースです。
-  image:
-    src: /logo.png
-    alt: ACE-Step Forge
   actions:
     - theme: brand
       text: Forge 概要

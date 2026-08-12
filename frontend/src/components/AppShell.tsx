@@ -6,10 +6,21 @@ import { useLocale } from "../i18n/LocaleProvider";
 import { getShellCopy } from "../i18n/shellCopy";
 import type { ServiceState } from "../lib/types";
 
+const REPOSITORY_URL = "https://github.com/Sunwood-ai-labs/ace-step-forge";
+
 interface AppShellProps {
   children: ReactNode;
   serviceState: ServiceState;
   activeCount: number;
+}
+
+function ForgeFooterLink({ label }: { label: string }) {
+  return (
+    <a className="footer-brand-link" href={REPOSITORY_URL} target="_blank" rel="noreferrer">
+      <img className="footer-brand-icon" src="/ace-step-forge-icon.png" alt="" aria-hidden="true" />
+      <span>{label}</span>
+    </a>
+  );
 }
 
 export function AppShell({ children, serviceState, activeCount }: AppShellProps) {
@@ -30,11 +41,8 @@ export function AppShell({ children, serviceState, activeCount }: AppShellProps)
       <a className="skip-link" href="#main-content">{copy.skipLink}</a>
       <aside className="sidebar" aria-label={copy.navigationLabel}>
         <div className="brand-lockup">
-          <img className="brand-mark" src="/ace-step-forge-icon.png" alt="" aria-hidden="true" />
-          <div>
-            <strong>ACE / STEP</strong>
-            <span>FORGE 1.5</span>
-          </div>
+          <strong>ACE / STEP</strong>
+          <span>FORGE 1.5</span>
         </div>
 
         <nav className="side-nav">
@@ -47,17 +55,14 @@ export function AppShell({ children, serviceState, activeCount }: AppShellProps)
           ))}
         </nav>
 
-        <div className="sidebar-footer">
+        <footer className="sidebar-footer">
           <div className={`service-badge ${serviceState}`} aria-label={serviceLabel}>
             <span aria-hidden="true" />
             {serviceLabel}
           </div>
           <p>{copy.localServiceNote}</p>
-          <a className="footer-brand-link" href="https://github.com/Sunwood-ai-labs/ace-step-forge" target="_blank" rel="noreferrer">
-            <img className="footer-brand-icon" src="/ace-step-forge-icon.png" alt="" aria-hidden="true" />
-            {copy.sourceApi}
-          </a>
-        </div>
+          <ForgeFooterLink label={copy.sourceApi} />
+        </footer>
       </aside>
 
       <section className="workspace">
@@ -75,6 +80,9 @@ export function AppShell({ children, serviceState, activeCount }: AppShellProps)
           </div>
         </header>
         <main id="main-content" className="main-content">{children}</main>
+        <footer className="mobile-brand-footer">
+          <ForgeFooterLink label={copy.sourceApi} />
+        </footer>
       </section>
     </div>
   );

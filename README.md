@@ -1,8 +1,4 @@
 <p align="center">
-  <img src="./docs/public/logo.png" width="96" alt="ACE-Step Forge mark">
-</p>
-
-<p align="center">
   <img src="./docs/public/images/ace-step-forge-header.png" width="100%" alt="ACE-STEP FORGE — local-first AI music workspace">
 </p>
 
