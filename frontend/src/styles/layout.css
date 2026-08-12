@@ -20,12 +20,19 @@
 .workspace { min-width: 0; }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 7rem; padding: 1.6rem clamp(1.25rem, 3vw, 3.4rem); border-bottom: 1px solid var(--line); }
 .topbar h1 { margin-top: 0.08rem; font-family: var(--font-display); font-size: clamp(1.85rem, 3.5vw, 2.7rem); font-weight: 500; line-height: 1.03; }
+.topbar-actions { display: flex; align-items: center; justify-content: flex-end; gap: 0.65rem; flex: none; }
 .topbar-status { display: inline-flex; align-items: center; gap: 0.5rem; flex: none; padding: 0.5rem 0.7rem; color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 99rem; font-size: 0.77rem; font-weight: 650; }
 .topbar-status svg { color: var(--lime); }
+.language-switcher { display: inline-flex; align-items: center; gap: 0.15rem; min-height: 2.35rem; padding: 0.23rem; color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 99rem; font-size: 0.7rem; font-weight: 760; letter-spacing: 0.04em; }
+.language-switcher > svg { margin-left: 0.3rem; color: var(--faint); }
+.language-switcher-label { margin: 0 0.16rem 0 0.1rem; color: var(--faint); }
+.language-switcher button { min-height: 1.78rem; padding: 0.27rem 0.45rem; color: var(--muted); background: transparent; border: 1px solid transparent; border-radius: 99rem; font: inherit; letter-spacing: inherit; }
+.language-switcher button:hover { color: var(--ink); background: rgba(246, 243, 233, 0.08); }
+.language-switcher button.is-selected { color: #1c210c; background: var(--lime); }
 .main-content { max-width: 112rem; padding: clamp(1.25rem, 3vw, 2.65rem); margin: 0 auto; }
 
 @media (max-width: 800px) {
   .app-frame { grid-template-columns: minmax(0, 1fr); }.sidebar { position: sticky; top: 0; z-index: 10; min-width: 0; height: auto; padding: 0.85rem 1rem; background: rgba(11, 12, 10, 0.96); border-right: 0; border-bottom: 1px solid var(--line); backdrop-filter: blur(14px); }.brand-lockup { padding: 0; }.side-nav { display: flex; min-width: 0; max-width: 100%; order: 2; overflow-x: auto; margin-top: 0.85rem; }.nav-caption, .sidebar-footer { display: none; }.nav-link { flex: 0 0 auto; gap: 0.5rem; min-height: 2.55rem; padding: 0.45rem 0.4rem; font-size: 0.82rem; }.workspace { overflow: hidden; }.topbar { min-height: 5.5rem; }.topbar-status { display: none; }
 }
 
-@media (max-width: 480px) { .topbar { align-items: flex-end; padding: 1.1rem; }.main-content { padding: 1rem; }.topbar h1 { font-size: 2rem; } }
+@media (max-width: 480px) { .topbar { align-items: flex-end; padding: 1.1rem; }.topbar-actions { align-self: flex-start; }.language-switcher-label { display: none; }.language-switcher { gap: 0.1rem; }.main-content { padding: 1rem; }.topbar h1 { font-size: 2rem; } }

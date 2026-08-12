@@ -23,3 +23,8 @@
   --radius-md: 0.75rem;
   --radius-sm: 0.5rem;
 }
+
+html[lang="ja"] {
+  --font-display: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", ui-serif, serif;
+  --font-ui: "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", Meiryo, ui-sans-serif, sans-serif;
+}

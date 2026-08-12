@@ -1,5 +1,7 @@
 import { Check, Copy } from "lucide-react";
 import { useState } from "react";
+import { useLocale } from "../i18n/LocaleProvider";
+import { getCodeCopy } from "../i18n/codeCopy";
 
 interface CodeSnippetProps {
   label: string;
@@ -26,6 +28,8 @@ async function copyText(value: string) {
 }
 
 export function CodeSnippet({ label, code, compact = false }: CodeSnippetProps) {
+  const { locale } = useLocale();
+  const copy = getCodeCopy(locale);
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
 
   const copyCode = async () => {
@@ -38,13 +42,13 @@ export function CodeSnippet({ label, code, compact = false }: CodeSnippetProps) 
     window.setTimeout(() => setCopyState("idle"), 1800);
   };
 
-  const status = copyState === "copied" ? "Copied" : copyState === "failed" ? "Copy manually" : "Copy";
+  const status = copyState === "copied" ? copy.copied : copyState === "failed" ? copy.failed : copy.copy;
 
   return (
     <div className={`code-snippet${compact ? " is-compact" : ""}`}>
       <div className="code-snippet-bar">
         <span>{label}</span>
-        <button type="button" onClick={() => void copyCode()} aria-label={`Copy ${label}`}>
+        <button type="button" onClick={() => void copyCode()} aria-label={copy.copyLabel(label)}>
           {copyState === "copied" ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
           {status}
         </button>

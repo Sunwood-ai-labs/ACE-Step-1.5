@@ -1,5 +1,7 @@
 import { LoaderCircle, Trash2, TriangleAlert, Waves } from "lucide-react";
 import { AudioPreview } from "./AudioPreview";
+import { useLocale } from "../i18n/LocaleProvider";
+import { getWorkspaceCopy } from "../i18n/workspaceCopy";
 import type { GenerationTask } from "../lib/types";
 
 interface TaskQueueProps {
@@ -9,23 +11,14 @@ interface TaskQueueProps {
   compact?: boolean;
 }
 
-function stateLabel(task: GenerationTask) {
-  if (task.state === "ready") return "Ready";
-  if (task.state === "failed") return "Needs review";
-  if (task.state === "working") return "Rendering";
-  return task.queuePosition ? `Queued · #${task.queuePosition}` : "Queued";
-}
-
-function createdAt(timestamp: number) {
-  return new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" }).format(timestamp);
-}
-
 export function TaskQueue({ tasks, onRemove, apiToken, compact = false }: TaskQueueProps) {
+  const { locale } = useLocale();
+  const copy = getWorkspaceCopy(locale).task;
   if (tasks.length === 0) {
     return (
-      <section className="empty-queue" aria-label="No generation jobs">
+      <section className="empty-queue" aria-label={copy.emptyLabel}>
         <Waves size={24} strokeWidth={1.4} aria-hidden="true" />
-        <div><strong>No jobs yet.</strong><p>Finished audio will appear here for every Forge device.</p></div>
+        <div><strong>{copy.emptyTitle}</strong><p>{copy.emptyBody}</p></div>
       </section>
     );
   }
@@ -39,14 +32,14 @@ export function TaskQueue({ tasks, onRemove, apiToken, compact = false }: TaskQu
           </div>
           <div className="task-copy">
             <div className="task-title-row">
-              <p className="task-title">{task.prompt || "Untitled generation"}</p>
-              <span className="task-state">{stateLabel(task)}</span>
+              <p className="task-title">{task.prompt || copy.untitled}</p>
+              <span className="task-state">{copy.state(task.state, task.queuePosition)}</span>
             </div>
-            <p className="task-meta">{task.taskType.replace("text2music", "text to music")} · {createdAt(task.createdAt)}</p>
+            <p className="task-meta">{copy.taskType[task.taskType]} · {new Intl.DateTimeFormat(copy.timeLocale, { hour: "2-digit", minute: "2-digit" }).format(task.createdAt)}</p>
             {task.error && <p className="task-error">{task.error}</p>}
             {task.result?.file && <AudioPreview file={task.result.file} apiToken={apiToken} />}
           </div>
-          <button className="icon-button subtle" type="button" onClick={() => void onRemove(task.id)} title="Remove from shared library" aria-label="Remove from shared library">
+          <button className="icon-button subtle" type="button" onClick={() => void onRemove(task.id)} title={copy.remove} aria-label={copy.remove}>
             <Trash2 size={16} aria-hidden="true" />
           </button>
         </article>

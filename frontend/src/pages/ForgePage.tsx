@@ -3,6 +3,8 @@ import { Composer } from "../components/Composer";
 import { MetricStrip } from "../components/MetricStrip";
 import { ServicePanel } from "../components/ServicePanel";
 import { TaskQueue } from "../components/TaskQueue";
+import { useLocale } from "../i18n/LocaleProvider";
+import { getWorkspaceCopy } from "../i18n/workspaceCopy";
 import type { Workspace } from "../lib/useWorkspace";
 
 interface ForgePageProps {
@@ -10,6 +12,8 @@ interface ForgePageProps {
 }
 
 export function ForgePage({ workspace }: ForgePageProps) {
+  const { locale } = useLocale();
+  const copy = getWorkspaceCopy(locale);
   const { tasks, metrics, notice, ...controls } = workspace;
   return (
     <div className="page-stack">
@@ -17,17 +21,17 @@ export function ForgePage({ workspace }: ForgePageProps) {
       <MetricStrip {...metrics} />
       <div className="forge-grid">
         <Composer models={controls.models} isSubmitting={controls.isSubmitting} serviceState={controls.serviceState} onSubmit={controls.submit} />
-        <aside className="inspector-column" aria-label="Generation service details">
+        <aside className="inspector-column" aria-label={copy.forge.inspectorLabel}>
           <ServicePanel state={controls.serviceState} health={controls.health} onRefresh={controls.refreshService} />
           <section className="field-note">
-            <p className="eyebrow">Working note</p>
-            <h2>Give the engine a scene, not a genre tag.</h2>
-            <p>Describe material, room, movement, and the point of emotional change. Then add only the tempo or key you truly need.</p>
+            <p className="eyebrow">{copy.forge.noteLabel}</p>
+            <h2>{copy.forge.noteTitle}</h2>
+            <p>{copy.forge.noteBody}</p>
           </section>
         </aside>
       </div>
       <section className="queue-section" aria-labelledby="queue-heading">
-        <div className="section-heading"><div><p className="eyebrow">Render queue</p><h2 id="queue-heading">What is taking shape</h2></div><ListMusic size={22} aria-hidden="true" /></div>
+        <div className="section-heading"><div><p className="eyebrow">{copy.forge.queueLabel}</p><h2 id="queue-heading">{copy.forge.queueTitle}</h2></div><ListMusic size={22} aria-hidden="true" /></div>
         <TaskQueue tasks={tasks.slice(0, 8)} onRemove={controls.removeTask} apiToken={controls.settings.apiToken} />
       </section>
     </div>

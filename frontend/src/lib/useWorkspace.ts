@@ -1,36 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocale } from "../i18n/LocaleProvider";
+import { formatWorkspaceNotice, type WorkspaceNotice } from "../i18n/workspaceNotice";
+import { getWorkspaceCopy } from "../i18n/workspaceCopy";
 import { ApiError, deleteLibraryItem, getHealth, getLibrary, getModels, queryTasks, submitTask } from "./api";
 import { readSettings, readTasks, writeSettings, writeTasks } from "./storage";
-import type {
-  ApiHealth,
-  ApiLibraryItem,
-  GenerationDraft,
-  GenerationTask,
-  ServiceState,
-  WorkspaceSettings,
-} from "./types";
-
-function activeTasks(tasks: GenerationTask[]) {
-  return tasks.filter((task) => task.state === "queued" || task.state === "working");
-}
-
-function taskFromLibrary(item: ApiLibraryItem): GenerationTask {
-  return {
-    id: item.id,
-    prompt: item.result.prompt ?? "",
-    taskType: item.task_type,
-    createdAt: item.created_at,
-    state: "ready",
-    result: item.result,
-  };
-}
-
-function mergeSharedLibrary(current: GenerationTask[], shared: GenerationTask[]) {
-  const activeOrFailed = current.filter((task) => task.state !== "ready");
-  return [...shared, ...activeOrFailed].sort((left, right) => right.createdAt - left.createdAt);
-}
-
+import { activeTasks, mergeSharedLibrary, taskFromLibrary } from "./workspaceTasks";
+import type { ApiHealth, GenerationDraft, GenerationTask, ServiceState, WorkspaceSettings } from "./types";
 export function useWorkspace() {
+  const { locale } = useLocale();
+  const copy = useMemo(() => getWorkspaceCopy(locale), [locale]);
   const [tasks, setTasks] = useState<GenerationTask[]>(readTasks);
   const taskRef = useRef(tasks);
   const previousTaskStates = useRef(new Map(tasks.map((task) => [task.id, task.state])));
@@ -39,7 +17,7 @@ export function useWorkspace() {
   const [health, setHealth] = useState<ApiHealth>();
   const [models, setModels] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [notice, setNotice] = useState<string>();
+  const [noticeState, setNoticeState] = useState<WorkspaceNotice>();
 
   useEffect(() => {
     taskRef.current = tasks;
@@ -51,11 +29,14 @@ export function useWorkspace() {
     const failedTask = tasks.find((task) => task.state === "failed" && earlierStates.get(task.id) !== "failed");
     const readyTask = tasks.find((task) => task.state === "ready" && earlierStates.get(task.id) !== "ready");
 
-    if (failedTask) setNotice(failedTask.error ?? "Generation needs review.");
-    else if (readyTask) setNotice("Your generated track is ready in the shared library.");
+    if (failedTask) {
+      setNoticeState(failedTask.error ? { type: "message", message: failedTask.error } : { type: "localized", key: "generationReview" });
+    } else if (readyTask) {
+      setNoticeState({ type: "localized", key: "trackReady" });
+    }
 
     previousTaskStates.current = new Map(tasks.map((task) => [task.id, task.state]));
-  }, [tasks]);
+  }, [copy, tasks]);
   useEffect(() => writeSettings(settings), [settings]);
 
   const refreshService = useCallback(async () => {
@@ -100,7 +81,7 @@ export function useWorkspace() {
           if (update.status === 1) return task;
           if (update.status === 2 && task.state !== "failed") {
             changed = true;
-            return { ...task, state: "failed", error: update.error ?? update.message ?? "Generation failed." };
+            return { ...task, state: "failed", error: update.error ?? update.message ?? copy.notice.generationReview };
           }
           if (update.status === 0 && task.state !== "working") {
             changed = true;
@@ -114,16 +95,16 @@ export function useWorkspace() {
         const libraryConfirmed = await refreshLibrary();
         if (libraryConfirmed) {
           setTasks((current) => current.filter((task) => !succeededTaskIds.has(task.id)));
-          setNotice("Saved to the shared library.");
+          setNoticeState({ type: "localized", key: "saved" });
         } else {
-          setNotice("Generation finished; waiting for shared library confirmation.");
+          setNoticeState({ type: "localized", key: "waitingLibrary" });
         }
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to refresh the generation queue.";
-      setNotice(message);
+      const message = error instanceof Error ? error.message : copy.notice.refreshQueue;
+      setNoticeState(error instanceof Error ? { type: "message", message } : { type: "localized", key: "refreshQueue" });
     }
-  }, [refreshLibrary, settings.apiToken]);
+  }, [copy, refreshLibrary, settings.apiToken]);
 
   useEffect(() => {
     void refreshService();
@@ -147,7 +128,7 @@ export function useWorkspace() {
   const submit = useCallback(
     async (draft: GenerationDraft) => {
       setIsSubmitting(true);
-      setNotice(undefined);
+      setNoticeState(undefined);
       try {
         const queued = await submitTask(draft, settings.apiToken);
         const newTask: GenerationTask = {
@@ -159,17 +140,17 @@ export function useWorkspace() {
           queuePosition: queued.queue_position,
         };
         setTasks((current) => [newTask, ...current]);
-        setNotice(`Queued at position ${queued.queue_position ?? "—"}.`);
+        setNoticeState({ type: "localized", key: "queued", position: queued.queue_position });
         return true;
       } catch (error) {
-        const message = error instanceof ApiError ? error.message : "Could not submit this generation.";
-        setNotice(message);
+        const message = error instanceof ApiError ? error.message : copy.notice.submitFailed;
+        setNoticeState(error instanceof ApiError ? { type: "message", message } : { type: "localized", key: "submitFailed" });
         return false;
       } finally {
         setIsSubmitting(false);
       }
     },
-    [settings.apiToken],
+    [copy, settings.apiToken],
   );
 
   const removeTask = useCallback(async (taskId: string) => {
@@ -182,12 +163,12 @@ export function useWorkspace() {
     try {
       await deleteLibraryItem(taskId, settings.apiToken);
       setTasks((current) => current.filter((item) => item.id !== taskId));
-      setNotice("Removed from the shared library.");
+      setNoticeState({ type: "localized", key: "removed" });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not remove this library item.";
-      setNotice(message);
+      const message = error instanceof Error ? error.message : copy.notice.removeFailed;
+      setNoticeState(error instanceof Error ? { type: "message", message } : { type: "localized", key: "removeFailed" });
     }
-  }, [settings.apiToken]);
+  }, [copy, settings.apiToken]);
 
   const metrics = useMemo(
     () => ({
@@ -206,7 +187,7 @@ export function useWorkspace() {
     health,
     models,
     isSubmitting,
-    notice,
+    notice: formatWorkspaceNotice(noticeState, copy),
     metrics,
     refreshService,
     refreshLibrary,

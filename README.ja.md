@@ -2,6 +2,10 @@
   <img src="./docs/public/logo.png" width="96" alt="ACE-Step Forge mark">
 </p>
 
+<p align="center">
+  <img src="./docs/public/images/ace-step-forge-header.png" width="100%" alt="ACE-STEP FORGE — ローカルファーストのAI音楽ワークスペース">
+</p>
+
 <h1 align="center">ACE-Step Forge</h1>
 
 <p align="center">

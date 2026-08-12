@@ -1,6 +1,9 @@
 import { Activity, Archive, CircleHelp, PlugZap, Settings2, Sparkles } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import type { ReactNode } from "react";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useLocale } from "../i18n/LocaleProvider";
+import { getShellCopy } from "../i18n/shellCopy";
 import type { ServiceState } from "../lib/types";
 
 interface AppShellProps {
@@ -9,29 +12,23 @@ interface AppShellProps {
   activeCount: number;
 }
 
-const navigation = [
-  { to: "/", label: "Create", icon: Sparkles, hint: "Compose a new generation" },
-  { to: "/library", label: "Library", icon: Archive, hint: "Listen to finished work" },
-  { to: "/mcp", label: "MCP", icon: PlugZap, hint: "Connect Claude Code or Codex" },
-  { to: "/system", label: "System", icon: Settings2, hint: "Connection and API access" },
-];
-
-function pageTitle(pathname: string) {
-  if (pathname === "/library") return ["Library", "Shared collection"];
-  if (pathname === "/mcp") return ["MCP", "Agent music bridge"];
-  if (pathname === "/system") return ["System", "Connection control"];
-  return ["Create", "A quieter way to start a track"];
-}
-
 export function AppShell({ children, serviceState, activeCount }: AppShellProps) {
   const location = useLocation();
-  const [title, eyebrow] = pageTitle(location.pathname);
-  const serviceLabel = serviceState === "online" ? "API ready" : serviceState === "checking" ? "Checking API" : "API unavailable";
+  const { locale } = useLocale();
+  const copy = getShellCopy(locale);
+  const [eyebrow, title] = copy.pageMeta(location.pathname);
+  const serviceLabel = copy.serviceLabel(serviceState);
+  const navigation = [
+    { to: "/", ...copy.navigation.create, icon: Sparkles },
+    { to: "/library", ...copy.navigation.library, icon: Archive },
+    { to: "/mcp", ...copy.navigation.mcp, icon: PlugZap },
+    { to: "/system", ...copy.navigation.system, icon: Settings2 },
+  ];
 
   return (
     <div className="app-frame">
-      <a className="skip-link" href="#main-content">Skip to main content</a>
-      <aside className="sidebar" aria-label="Primary navigation">
+      <a className="skip-link" href="#main-content">{copy.skipLink}</a>
+      <aside className="sidebar" aria-label={copy.navigationLabel}>
         <div className="brand-lockup">
           <div className="brand-mark" aria-hidden="true"><span>A</span><i /></div>
           <div>
@@ -41,7 +38,7 @@ export function AppShell({ children, serviceState, activeCount }: AppShellProps)
         </div>
 
         <nav className="side-nav">
-          <p className="nav-caption">Workspace</p>
+          <p className="nav-caption">{copy.workspace}</p>
           {navigation.map(({ to, label, icon: Icon, hint }) => (
             <NavLink key={to} to={to} end={to === "/"} className={({ isActive }) => `nav-link${isActive ? " is-active" : ""}`} title={hint}>
               <Icon size={18} strokeWidth={1.8} aria-hidden="true" />
@@ -55,9 +52,9 @@ export function AppShell({ children, serviceState, activeCount }: AppShellProps)
             <span aria-hidden="true" />
             {serviceLabel}
           </div>
-          <p>All jobs are rendered by your local ACE-Step service.</p>
+          <p>{copy.localServiceNote}</p>
           <a href="https://github.com/Sunwood-ai-labs/ace-step-forge" target="_blank" rel="noreferrer">
-            <CircleHelp size={15} aria-hidden="true" /> Source &amp; API
+            <CircleHelp size={15} aria-hidden="true" /> {copy.sourceApi}
           </a>
         </div>
       </aside>
@@ -68,9 +65,12 @@ export function AppShell({ children, serviceState, activeCount }: AppShellProps)
             <p className="eyebrow">{eyebrow}</p>
             <h1>{title}</h1>
           </div>
-          <div className="topbar-status" aria-label={`${activeCount} active jobs`}>
-            <Activity size={16} aria-hidden="true" />
-            <span>{activeCount ? `${activeCount} job${activeCount === 1 ? "" : "s"} in motion` : "Queue clear"}</span>
+          <div className="topbar-actions">
+            <LanguageSwitcher />
+            <div className="topbar-status" aria-label={copy.activeJobs(activeCount)}>
+              <Activity size={16} aria-hidden="true" />
+              <span>{copy.activeJobs(activeCount)}</span>
+            </div>
           </div>
         </header>
         <main id="main-content" className="main-content">{children}</main>
