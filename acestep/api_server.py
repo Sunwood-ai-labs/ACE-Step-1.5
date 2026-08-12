@@ -35,6 +35,7 @@ from acestep.api.train_api_service import (
     initialize_training_state,
 )
 from acestep.api.jobs.store import _JobStore
+from acestep.api.library_store import LibraryStore
 from acestep.api.log_capture import install_log_capture
 from acestep.api.route_setup import configure_api_routes
 from acestep.api.server_cli import run_api_server_main
@@ -186,6 +187,7 @@ sys.stderr = _stderr_proxy
 
 def create_app() -> FastAPI:
     store = _JobStore()
+    library_store = LibraryStore(os.path.join(_get_project_root(), "gradio_outputs", "forge-library"))
 
     # API Key authentication (from environment variable)
     api_key = os.getenv("ACESTEP_API_KEY", None)
@@ -313,6 +315,7 @@ def create_app() -> FastAPI:
             )
 
     app = FastAPI(title="ACE-Step API", version="1.0", lifespan=lifespan)
+    app.state.library_store = library_store
 
     configure_api_routes(
         app=app,
@@ -349,6 +352,7 @@ def create_app() -> FastAPI:
         runtime_atomic_write_json=_runtime_atomic_write_json,
         runtime_append_jsonl=_runtime_append_jsonl,
         create_sample=create_sample,
+        library_store=library_store,
     )
 
     return app

@@ -25,7 +25,7 @@ export function TaskQueue({ tasks, onRemove, apiToken, compact = false }: TaskQu
     return (
       <section className="empty-queue" aria-label="No generation jobs">
         <Waves size={24} strokeWidth={1.4} aria-hidden="true" />
-        <div><strong>No jobs yet.</strong><p>Your finished audio will stay here in this browser.</p></div>
+        <div><strong>No jobs yet.</strong><p>Finished audio will appear here for every Forge device.</p></div>
       </section>
     );
   }
@@ -46,7 +46,7 @@ export function TaskQueue({ tasks, onRemove, apiToken, compact = false }: TaskQu
             {task.error && <p className="task-error">{task.error}</p>}
             {task.result?.file && <AudioPreview file={task.result.file} apiToken={apiToken} />}
           </div>
-          <button className="icon-button subtle" type="button" onClick={() => onRemove(task.id)} title="Remove this local task record" aria-label="Remove this local task record">
+          <button className="icon-button subtle" type="button" onClick={() => void onRemove(task.id)} title="Remove from shared library" aria-label="Remove from shared library">
             <Trash2 size={16} aria-hidden="true" />
           </button>
         </article>

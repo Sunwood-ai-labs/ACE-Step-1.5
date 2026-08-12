@@ -76,6 +76,20 @@ async def run_one_job_runtime(
         loop = asyncio.get_running_loop()
         result = await loop.run_in_executor(executor, _blocking_generate)
         job_store.mark_succeeded(job_id, result)
+        library_store = getattr(app_state, "library_store", None)
+        if library_store is not None:
+            record = store.get(job_id)
+            try:
+                library_store.record_success(
+                    job_id=job_id,
+                    result=result,
+                    prompt=str(getattr(req, "prompt", "")),
+                    lyrics=str(getattr(req, "lyrics", "")),
+                    task_type=str(getattr(req, "task_type", "text2music")),
+                    created_at=getattr(record, "created_at", None),
+                )
+            except Exception as library_error:
+                log_fn(f"[API Server] Could not save shared library item for {job_id}: {library_error}")
         update_terminal_job_cache_fn(
             app_state=app_state,
             store=store,

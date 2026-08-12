@@ -16,7 +16,7 @@ const navigation = [
 ];
 
 function pageTitle(pathname: string) {
-  if (pathname === "/library") return ["Library", "Local collection"];
+  if (pathname === "/library") return ["Library", "Shared collection"];
   if (pathname === "/system") return ["System", "Connection control"];
   return ["Create", "A quieter way to start a track"];
 }

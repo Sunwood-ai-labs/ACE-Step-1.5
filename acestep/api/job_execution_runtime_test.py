@@ -16,29 +16,39 @@ class JobExecutionRuntimeTests(unittest.IsolatedAsyncioTestCase):
     """Behavior tests for queue-worker runtime execution orchestration."""
 
     async def test_run_one_job_runtime_success_updates_terminal_cache(self) -> None:
-        """Success path should mark succeeded and write terminal cache success status."""
+        """Success path should cache the result and persist it in the shared library."""
 
+        library_store = MagicMock()
+        store = MagicMock()
+        store.get.return_value = SimpleNamespace(created_at=123.0)
         app_state = SimpleNamespace(
             job_store=MagicMock(),
+            library_store=library_store,
             executor=MagicMock(),
             stats_lock=asyncio.Lock(),
             recent_durations=deque(maxlen=50),
             avg_job_seconds=5.0,
         )
-        req = SimpleNamespace(model="acestep-v15")
+        req = SimpleNamespace(
+            model="acestep-v15",
+            prompt="taiko guitar",
+            lyrics="run into dawn",
+            task_type="text2music",
+        )
         selected_handler = SimpleNamespace(_empty_cache=MagicMock())
         select_generation_handler_fn = MagicMock(return_value=(selected_handler, "model-A"))
         ensure_models_initialized_fn = AsyncMock()
         update_progress_job_cache_fn = MagicMock()
         update_terminal_job_cache_fn = MagicMock()
-        build_blocking_result_fn = MagicMock(return_value={"status_message": "Success"})
+        result = {"status_message": "Success", "raw_audio_paths": ["/tmp/take.mp3"]}
+        build_blocking_result_fn = MagicMock(return_value=result)
         loop_mock = MagicMock()
-        loop_mock.run_in_executor = AsyncMock(return_value={"status_message": "Success"})
+        loop_mock.run_in_executor = AsyncMock(return_value=result)
 
         with patch("acestep.api.job_execution_runtime.asyncio.get_running_loop", return_value=loop_mock):
             await run_one_job_runtime(
                 app_state=app_state,
-                store=MagicMock(),
+                store=store,
                 job_id="job-1",
                 req=req,
                 ensure_models_initialized_fn=ensure_models_initialized_fn,
@@ -55,7 +65,15 @@ class JobExecutionRuntimeTests(unittest.IsolatedAsyncioTestCase):
 
         app_state.job_store.mark_running.assert_called_once_with("job-1")
         app_state.job_store.mark_succeeded.assert_called_once_with(
-            "job-1", {"status_message": "Success"}
+            "job-1", result
+        )
+        library_store.record_success.assert_called_once_with(
+            job_id="job-1",
+            result=result,
+            prompt="taiko guitar",
+            lyrics="run into dawn",
+            task_type="text2music",
+            created_at=123.0,
         )
         update_progress_job_cache_fn.assert_called_once()
         update_terminal_job_cache_fn.assert_called_once()

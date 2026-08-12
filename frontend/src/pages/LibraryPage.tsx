@@ -12,7 +12,7 @@ export function LibraryPage({ workspace }: LibraryPageProps) {
   return (
     <div className="page-stack library-page">
       <section className="library-hero">
-        <div><p className="eyebrow">Local collection</p><h2>Your finished takes, close at hand.</h2><p>Audio is served from ACE-Step; this workspace only remembers the job metadata in your browser.</p></div>
+        <div><p className="eyebrow">Shared collection</p><h2>Your finished takes, close at hand.</h2><p>Completed audio is kept by Forge, so every device on this workspace can audition it.</p></div>
         <div className="library-count"><Music2 size={24} aria-hidden="true" /><strong>{ready.length}</strong><span>ready to audition</span></div>
       </section>
       <section className="queue-section" aria-labelledby="ready-heading">
