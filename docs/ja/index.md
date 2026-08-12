@@ -1,34 +1,40 @@
 ---
 layout: home
 hero:
-  name: ACE-Step 1.5
-  text: オープンソース音楽生成
-  tagline: コンシューマーハードウェアで商用グレードの音楽生成。A100で1曲2秒未満、VRAM 4GB未満。
+  name: ACE-Step Forge
+  text: 生成したテイクを、きちんと残して使う。
+  tagline: ACE-Step 1.5 のローカル音楽生成、共有 Library、そしてコーディングエージェント用 MCP をひとつにまとめたワークスペースです。
   image:
     src: /logo.png
-    alt: ACE-Step
+    alt: ACE-Step Forge
   actions:
     - theme: brand
-      text: インストール
-      link: /ja/INSTALL
+      text: Forge 概要
+      link: /ja/FORGE
     - theme: alt
-      text: チュートリアル (必読)
-      link: /ja/Tutorial
+      text: MCP セットアップ
+      link: /ja/MCP
     - theme: alt
-      text: API リファレンス
-      link: /ja/API
-
+      text: 12 GB GPU 運用
+      link: /ja/GPU_12GB
 features:
-  - icon: "&#9889;"
-    title: 超高速生成
-    details: A100で1曲2秒未満、RTX 3090で10秒未満。10秒から10分の音声生成に対応。
-  - icon: "&#127925;"
-    title: 商用グレード品質
-    details: 1000以上の楽器・スタイル、50以上の言語、きめ細やかな音色記述と歌詞構造制御。
-  - icon: "&#127899;"
-    title: 多彩な編集機能
-    details: カバー生成、リペイント、トラック分離、ボーカルからBGM、マルチトラック生成など。
-  - icon: "&#128640;"
-    title: 軽量・カスタマイズ可能
-    details: 4GB未満のVRAMでローカル実行。数曲からLoRAを学習、3090で1時間。
+  - icon: "✦"
+    title: Create → Library
+    details: 完成した曲を Forge サービス側に保存し、同じサービスを使うブラウザから再生できます。
+  - icon: "⌘"
+    title: localhost の MCP
+    details: Claude Code や Codex から、同じ生成キューを Streamable HTTP で使えます。
+  - icon: "◌"
+    title: 安定した GPU 選択
+    details: コンテナ内の番号ではなく GPU UUID を Compose に渡し、使うカードを明示します。
 ---
+
+## 完成した曲を再生するところまで
+
+![生成済みの曲を再生する ACE-Step Forge Library](/images/forge-library-playback.png)
+
+これは実際にローカルで動作した Forge の画面です。和風ロックの生成が **Ready** になり、共有
+Library に現れ、ブラウザのオーディオプレーヤーで再生されています。
+
+[Forge 概要](./FORGE)から始め、必要に応じて [MCP セットアップ](./MCP) や
+[12 GB GPU 運用](./GPU_12GB) を参照してください。

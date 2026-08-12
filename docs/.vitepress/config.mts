@@ -6,7 +6,6 @@ export default defineConfig({
 
   base: '/ace-step-forge/',
   lastUpdated: true,
-  cleanUrls: true,
   ignoreDeadLinks: [
     /localhost/,
     /\.\.\/\.\.\/README/,
@@ -76,6 +75,8 @@ export default defineConfig({
 
   themeConfig: {
     logo: '/logo.png',
+    nav: navEN(),
+    sidebar: sidebarEN(),
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Sunwood-ai-labs/ace-step-forge' },
@@ -105,7 +106,16 @@ export default defineConfig({
 function navEN() {
   return [
     {
-      text: 'Guide',
+      text: 'Forge',
+      items: [
+        { text: 'Workspace overview', link: '/en/FORGE' },
+        { text: 'MCP setup', link: '/en/MCP' },
+        { text: '12 GB GPU operation', link: '/en/GPU_12GB' },
+        { text: 'React UI contract', link: '/en/REACT_FORGE' },
+      ],
+    },
+    {
+      text: 'ACE-Step 1.5',
       items: [
         { text: 'Installation', link: '/en/INSTALL' },
         { text: 'Tutorial', link: '/en/Tutorial' },
@@ -142,6 +152,15 @@ function navEN() {
 function sidebarEN() {
   return {
     '/en/': [
+      {
+        text: 'Forge Workspace',
+        items: [
+          { text: 'Overview', link: '/en/FORGE' },
+          { text: 'MCP Setup', link: '/en/MCP' },
+          { text: '12 GB GPU Operation', link: '/en/GPU_12GB' },
+          { text: 'React UI Contract', link: '/en/REACT_FORGE' },
+        ],
+      },
       {
         text: 'Getting Started',
         items: [
@@ -285,7 +304,16 @@ function sidebarZH() {
 function navJA() {
   return [
     {
-      text: 'ガイド',
+      text: 'Forge',
+      items: [
+        { text: 'ワークスペース概要', link: '/ja/FORGE' },
+        { text: 'MCP セットアップ', link: '/ja/MCP' },
+        { text: '12 GB GPU 運用', link: '/ja/GPU_12GB' },
+        { text: 'React UI 契約', link: '/en/REACT_FORGE' },
+      ],
+    },
+    {
+      text: 'ACE-Step 1.5',
       items: [
         { text: 'インストール', link: '/ja/INSTALL' },
         { text: 'チュートリアル', link: '/ja/Tutorial' },
@@ -316,6 +344,15 @@ function navJA() {
 function sidebarJA() {
   return {
     '/ja/': [
+      {
+        text: 'Forge ワークスペース',
+        items: [
+          { text: '概要', link: '/ja/FORGE' },
+          { text: 'MCP セットアップ', link: '/ja/MCP' },
+          { text: '12 GB GPU 運用', link: '/ja/GPU_12GB' },
+          { text: 'React UI 契約', link: '/en/REACT_FORGE' },
+        ],
+      },
       {
         text: 'はじめに',
         items: [

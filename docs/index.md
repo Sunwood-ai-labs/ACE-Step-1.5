@@ -2,33 +2,42 @@
 layout: home
 hero:
   name: ACE-Step Forge
-  text: Local-first Music Workspace
-  tagline: A focused React workspace powered by the ACE-Step 1.5 open-source music model.
+  text: Local-first music generation, kept together.
+  tagline: A React workspace and Streamable HTTP MCP gateway built around the open-source ACE-Step 1.5 engine.
   image:
     src: /logo.png
     alt: ACE-Step Forge
   actions:
     - theme: brand
-      text: Get Started
-      link: /en/INSTALL
+      text: Forge overview
+      link: /en/FORGE
     - theme: alt
-      text: Tutorial
-      link: /en/Tutorial
+      text: Connect MCP
+      link: /en/MCP
     - theme: alt
-      text: GitHub
-      link: https://github.com/Sunwood-ai-labs/ace-step-forge
-
+      text: 日本語
+      link: /ja/FORGE
 features:
-  - icon: "&#9889;"
-    title: Ultra-Fast Generation
-    details: Under 2s per full song on A100, under 10s on RTX 3090. Supports 10s to 10min audio.
-  - icon: "&#127925;"
-    title: Commercial-Grade Quality
-    details: 1000+ instruments and styles, 50+ languages, fine-grained timbre description and metadata control.
-  - icon: "&#127899;"
-    title: Versatile Editing
-    details: Cover generation, repainting, track separation, vocal-to-BGM, multi-track generation, and more.
-  - icon: "&#128640;"
-    title: Lightweight & Customizable
-    details: Runs locally with <4GB VRAM. Train a LoRA from just a few songs to capture your own style.
+  - icon: "✦"
+    title: One creative loop
+    details: Generate in Forge, then audition and download the completed audio from the shared Library.
+  - icon: "⌘"
+    title: Agent-ready
+    details: Claude Code and Codex use the same ACE-Step queue through a local Streamable HTTP MCP gateway.
+  - icon: "◌"
+    title: GPU intentional
+    details: Compose accepts a stable GPU UUID, so a multi-GPU workstation can keep ACE-Step on the intended card.
+  - icon: "↗"
+    title: Upstream preserved
+    details: The official API and Gradio UI remain available alongside the Forge workspace.
 ---
+
+## A verified local workflow
+
+![ACE-Step Forge Library showing generated music and an active audio player](/images/forge-library-playback.png)
+
+The screenshot is from the running local Forge application. A generated Japanese
+rock instrumental reached **Ready**, appeared in the shared Library, and was
+started through the browser audio player.
+
+[Read the Forge guide](./en/FORGE) · [日本語ガイド](./ja/FORGE)

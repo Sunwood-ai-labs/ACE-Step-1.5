@@ -1,40 +1,37 @@
 ---
 layout: home
 hero:
-  name: ACE-Step 1.5
-  text: Open-Source Music Generation
-  tagline: Commercial-grade music generation on consumer hardware. Under 2s per song on A100, <4GB VRAM.
+  name: ACE-Step Forge
+  text: A local music workspace that keeps the take.
+  tagline: Generate with ACE-Step 1.5, retain completed audio in a shared Library, and connect coding agents through MCP.
   image:
     src: /logo.png
-    alt: ACE-Step
+    alt: ACE-Step Forge
   actions:
     - theme: brand
-      text: Installation
-      link: /en/INSTALL
+      text: Forge overview
+      link: /en/FORGE
     - theme: alt
-      text: Tutorial (Must Read)
-      link: /en/Tutorial
+      text: MCP setup
+      link: /en/MCP
     - theme: alt
-      text: API Reference
-      link: /en/API
-
+      text: 12 GB GPU guide
+      link: /en/GPU_12GB
 features:
-  - icon: "&#9889;"
-    title: Ultra-Fast Generation
-    details: Under 2s per full song on A100, under 10s on RTX 3090. Supports 10s to 10min audio generation.
-  - icon: "&#127925;"
-    title: Commercial-Grade Quality
-    details: 1000+ instruments and styles, 50+ languages with lyrics prompt for structure and style control.
-  - icon: "&#127899;"
-    title: Versatile Editing
-    details: Cover generation, repainting, track separation, vocal-to-BGM, multi-track generation, and more.
-  - icon: "&#128640;"
-    title: Lightweight & Customizable
-    details: Runs locally with <4GB VRAM. Train a LoRA from just a few songs in 1 hour on a 3090.
-  - icon: "&#127908;"
-    title: Reference Audio Input
-    details: Use reference audio to guide generation style. Create covers from existing audio.
-  - icon: "&#128300;"
-    title: Audio Understanding
-    details: Extract BPM, key/scale, time signature and caption from audio. Auto-generate LRC timestamps.
+  - icon: "✦"
+    title: Create → Library
+    details: A completed job is retained by the Forge service and ready to play from any browser using that service.
+  - icon: "⌘"
+    title: MCP on localhost
+    details: Claude Code and Codex can call the same generation queue with a local Streamable HTTP connection.
+  - icon: "◌"
+    title: Stable GPU selection
+    details: Configure Compose with a GPU UUID rather than trusting an unstable container index.
 ---
+
+## See the completed track
+
+![A locally generated ACE-Step Forge track playing in Library](/images/forge-library-playback.png)
+
+Start with the [Forge workspace overview](./FORGE), then follow the
+[MCP setup](./MCP) or [12 GB GPU operation guide](./GPU_12GB).

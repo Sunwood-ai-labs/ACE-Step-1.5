@@ -263,3 +263,6 @@ web/
 output/
 docs/en/awesome.md
 package-lock.json
+# The documentation site is an independently deployable Node project. Keep its
+# root lockfile under version control so GitHub Pages builds are reproducible.
+!/package-lock.json
