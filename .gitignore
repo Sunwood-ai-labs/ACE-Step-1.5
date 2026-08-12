@@ -259,5 +259,7 @@ acestep_output/
 node_modules/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+web/
+output/
 docs/en/awesome.md
 package-lock.json
