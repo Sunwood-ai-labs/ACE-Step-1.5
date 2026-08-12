@@ -7,6 +7,7 @@ RUN npm ci --ignore-scripts --no-audit --no-fund
 FROM dependencies AS build
 WORKDIR /app
 COPY index.html tsconfig.json tsconfig.app.json tsconfig.node.json vite.config.ts ./
+COPY public ./public
 COPY src ./src
 RUN npm run build
 

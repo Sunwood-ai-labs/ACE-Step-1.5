@@ -16,7 +16,7 @@ export default defineConfig({
   ],
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/ace-step-forge/favicon.svg' }],
+    ['link', { rel: 'icon', type: 'image/png', href: '/ace-step-forge/logo.png' }],
     ['meta', { name: 'og:type', content: 'website' }],
     ['meta', { name: 'og:title', content: 'ACE-Step Forge Documentation' }],
     ['meta', { name: 'og:description', content: 'Local-first music workspace powered by ACE-Step 1.5' }],

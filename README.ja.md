@@ -145,3 +145,8 @@ npm run build
 [MIT License](./LICENSE) で公開しています。ACE-Step の上流コードとモデル資料のクレジットは
 ACE-Step チームに帰属します。研究・モデル・エコシステムについては
 [公式 ACE-Step 1.5 リポジトリ](https://github.com/ace-step/ACE-Step-1.5)を参照してください。
+
+<p align="center">
+  <img src="./docs/public/logo.png" width="52" alt="ACE-Step Forge アイコン"><br>
+  <sub>ACE-Step Forge アイコン</sub>
+</p>

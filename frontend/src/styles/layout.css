@@ -3,8 +3,7 @@
 .brand-lockup { display: flex; align-items: center; gap: 0.75rem; padding: 0.35rem 0.5rem 1.6rem; }
 .brand-lockup strong { display: block; font-family: var(--font-display); font-size: 1.05rem; letter-spacing: 0.09em; }
 .brand-lockup span { display: block; margin-top: 0.05rem; color: var(--muted); font-size: 0.61rem; font-weight: 700; letter-spacing: 0.16em; }
-.brand-mark { position: relative; display: grid; width: 2.25rem; height: 2.25rem; overflow: hidden; place-items: center; color: var(--canvas); background: var(--lime); border-radius: 0.65rem; font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; }
-.brand-mark i { position: absolute; right: -0.15rem; bottom: -0.25rem; width: 1.2rem; height: 0.36rem; background: var(--canvas); transform: rotate(-47deg); }
+.brand-mark { display: block; flex: 0 0 auto; width: 2.4rem; height: 2.4rem; object-fit: cover; background: #050504; border: 1px solid rgba(246, 243, 233, 0.16); border-radius: 0.72rem; box-shadow: 0 0 0 1px rgba(216, 237, 118, 0.08), 0 8px 20px rgba(0, 0, 0, 0.28); }
 .side-nav { display: grid; gap: 0.35rem; }
 .nav-caption { padding: 0 0.5rem 0.35rem; color: var(--faint); font-size: 0.68rem; font-weight: 740; letter-spacing: 0.11em; text-transform: uppercase; }
 .nav-link { display: flex; align-items: center; gap: 0.75rem; min-height: 2.9rem; padding: 0.55rem 0.65rem; color: var(--muted); border-radius: var(--radius-sm); text-decoration: none; font-size: 0.9rem; font-weight: 650; }
@@ -13,6 +12,9 @@
 .sidebar-footer { display: grid; gap: 0.75rem; margin-top: auto; padding: 1rem 0.5rem 0; color: var(--faint); font-size: 0.74rem; }
 .sidebar-footer p { line-height: 1.45; }
 .sidebar-footer a { display: inline-flex; align-items: center; gap: 0.4rem; width: fit-content; color: var(--muted); text-decoration: none; }
+.sidebar-footer a:hover { color: var(--ink); }
+.footer-brand-link { font-weight: 650; }
+.footer-brand-icon { width: 1.2rem; height: 1.2rem; object-fit: cover; background: #050504; border: 1px solid rgba(246, 243, 233, 0.14); border-radius: 0.35rem; box-shadow: 0 0 0 1px rgba(216, 237, 118, 0.08); }
 .service-badge { display: inline-flex; align-items: center; gap: 0.45rem; width: fit-content; color: var(--muted); font-size: 0.72rem; font-weight: 700; }
 .service-badge span { width: 0.45rem; height: 0.45rem; background: var(--faint); border-radius: 50%; }
 .service-badge.online { color: var(--lime); }.service-badge.online span { background: var(--lime); }.service-badge.offline { color: var(--coral); }.service-badge.offline span { background: var(--coral); }
