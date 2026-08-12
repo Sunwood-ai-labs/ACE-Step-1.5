@@ -64,6 +64,23 @@ class LibraryStoreTests(unittest.TestCase):
             self.assertFalse(audio.exists())
             self.assertIsNone(store.resolve_audio("../source.mp3"))
 
+    def test_refuses_to_report_success_when_generated_audio_is_missing(self) -> None:
+        """An absent generation output must not create an empty ready Library entry."""
+
+        with tempfile.TemporaryDirectory() as directory:
+            store = LibraryStore(str(Path(directory) / "library"))
+
+            with self.assertRaises(FileNotFoundError):
+                store.record_success(
+                    job_id="job-missing",
+                    result={"raw_audio_paths": [str(Path(directory) / "missing.mp3")]},
+                    prompt="taiko rock",
+                    lyrics="",
+                    task_type="text2music",
+                )
+
+            self.assertEqual([], store.list_items())
+
 
 if __name__ == "__main__":
     unittest.main()

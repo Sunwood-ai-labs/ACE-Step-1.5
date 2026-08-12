@@ -129,6 +129,51 @@ class JobExecutionRuntimeTests(unittest.IsolatedAsyncioTestCase):
         selected_handler._empty_cache.assert_called_once()
         self.assertTrue(any("FAILED" in str(call.args[0]) for call in log_fn.call_args_list))
 
+    async def test_run_one_job_runtime_marks_failed_when_library_archive_fails(self) -> None:
+        """A take must not be reported ready unless its shared archive was written."""
+
+        library_store = MagicMock()
+        library_store.record_success.return_value = []
+        store = MagicMock()
+        store.get.return_value = SimpleNamespace(created_at=123.0)
+        app_state = SimpleNamespace(
+            job_store=MagicMock(),
+            library_store=library_store,
+            executor=MagicMock(),
+            stats_lock=asyncio.Lock(),
+            recent_durations=deque(maxlen=50),
+            avg_job_seconds=5.0,
+        )
+        req = SimpleNamespace(model="acestep-v15", prompt="taiko guitar", lyrics="", task_type="text2music")
+        selected_handler = SimpleNamespace(_empty_cache=MagicMock())
+        result = {"status_message": "Success", "raw_audio_paths": ["/tmp/take.mp3"]}
+        loop_mock = MagicMock()
+        loop_mock.run_in_executor = AsyncMock(return_value=result)
+        update_terminal_job_cache_fn = MagicMock()
+
+        with patch("acestep.api.job_execution_runtime.asyncio.get_running_loop", return_value=loop_mock):
+            await run_one_job_runtime(
+                app_state=app_state,
+                store=store,
+                job_id="job-library-failure",
+                req=req,
+                ensure_models_initialized_fn=AsyncMock(),
+                select_generation_handler_fn=MagicMock(return_value=(selected_handler, "model-A")),
+                get_model_name=MagicMock(return_value="m"),
+                build_blocking_result_fn=MagicMock(return_value=result),
+                update_progress_job_cache_fn=MagicMock(),
+                update_terminal_job_cache_fn=update_terminal_job_cache_fn,
+                map_status=MagicMock(return_value="failed"),
+                result_key_prefix="prefix_",
+                result_expire_seconds=3600,
+                log_fn=MagicMock(),
+            )
+
+        app_state.job_store.mark_succeeded.assert_not_called()
+        app_state.job_store.mark_failed.assert_called_once()
+        self.assertEqual("failed", update_terminal_job_cache_fn.call_args.kwargs["status"])
+        selected_handler._empty_cache.assert_called_once()
+
     async def test_run_one_job_runtime_integration_uses_real_executor_and_wires_handler(self) -> None:
         """Integration-style check with real run_in_executor and callback wiring."""
 

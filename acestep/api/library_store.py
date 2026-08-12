@@ -50,7 +50,15 @@ class LibraryStore:
 
         raw_paths = [str(path) for path in result.get("raw_audio_paths", []) if path]
         if not raw_paths:
-            return []
+            raise ValueError("Generation completed without any audio paths to archive")
+
+        sources = [Path(raw_path) for raw_path in raw_paths]
+        missing_sources = [str(source) for source in sources if not source.is_file()]
+        if missing_sources:
+            raise FileNotFoundError(
+                "Generated audio disappeared before it could be saved to the shared library: "
+                + ", ".join(missing_sources)
+            )
 
         metadata = result.get("metas") if isinstance(result.get("metas"), dict) else {}
         safe_prompt = prompt or str(result.get("prompt") or metadata.get("prompt") or "")
@@ -63,10 +71,7 @@ class LibraryStore:
             ids = {f"{job_id}:{index}" for index in range(len(raw_paths))}
             retained = [item for item in items if item.get("id") not in ids]
 
-            for index, raw_path in enumerate(raw_paths):
-                source = Path(raw_path)
-                if not source.is_file():
-                    continue
+            for index, source in enumerate(sources):
                 extension = source.suffix.lower() or ".mp3"
                 filename = f"{job_id}-{index}{extension}"
                 self._copy_audio_locked(source, self._audio_dir / filename)

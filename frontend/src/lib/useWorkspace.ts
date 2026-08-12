@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ApiError, deleteLibraryItem, getHealth, getLibrary, getModels, parseResult, queryTasks, submitTask } from "./api";
+import { ApiError, deleteLibraryItem, getHealth, getLibrary, getModels, queryTasks, submitTask } from "./api";
 import { readSettings, readTasks, writeSettings, writeTasks } from "./storage";
 import type {
   ApiHealth,
@@ -52,7 +52,7 @@ export function useWorkspace() {
     const readyTask = tasks.find((task) => task.state === "ready" && earlierStates.get(task.id) !== "ready");
 
     if (failedTask) setNotice(failedTask.error ?? "Generation needs review.");
-    else if (readyTask) setNotice("Your generated track is ready.");
+    else if (readyTask) setNotice("Your generated track is ready in the shared library.");
 
     previousTaskStates.current = new Map(tasks.map((task) => [task.id, task.state]));
   }, [tasks]);
@@ -76,8 +76,10 @@ export function useWorkspace() {
       const response = await getLibrary(settings.apiToken);
       const shared = response.items.map(taskFromLibrary);
       setTasks((current) => mergeSharedLibrary(current, shared));
+      return true;
     } catch {
       // The health panel reports service reachability; retain active local jobs until it returns.
+      return false;
     }
   }, [settings.apiToken]);
 
@@ -86,15 +88,16 @@ export function useWorkspace() {
     if (active.length === 0) return;
     try {
       const updates = await queryTasks(active.map((task) => task.id), settings.apiToken);
+      const succeededTaskIds = new Set(updates.filter((item) => item.status === 1).map((item) => item.task_id));
       setTasks((current) => {
         let changed = false;
         const next: GenerationTask[] = current.map((task): GenerationTask => {
           const update = updates.find((item) => item.task_id === task.id);
           if (!update) return task;
-          if (update.status === 1 && task.state !== "ready") {
-            changed = true;
-            return { ...task, state: "ready", result: parseResult(update.result) };
-          }
+          // A job becomes visible as Ready only when the API's shared Library
+          // returns it. This avoids presenting browser-local success when the
+          // server has not confirmed durable audio storage yet.
+          if (update.status === 1) return task;
           if (update.status === 2 && task.state !== "failed") {
             changed = true;
             return { ...task, state: "failed", error: update.error ?? update.message ?? "Generation failed." };
@@ -107,7 +110,15 @@ export function useWorkspace() {
         });
         return changed ? next : current;
       });
-      if (updates.some((item) => item.status === 1)) void refreshLibrary();
+      if (succeededTaskIds.size > 0) {
+        const libraryConfirmed = await refreshLibrary();
+        if (libraryConfirmed) {
+          setTasks((current) => current.filter((task) => !succeededTaskIds.has(task.id)));
+          setNotice("Saved to the shared library.");
+        } else {
+          setNotice("Generation finished; waiting for shared library confirmation.");
+        }
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to refresh the generation queue.";
       setNotice(message);
