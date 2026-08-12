@@ -1,4 +1,4 @@
-import { Activity, Archive, CircleHelp, Settings2, Sparkles } from "lucide-react";
+import { Activity, Archive, CircleHelp, PlugZap, Settings2, Sparkles } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import type { ReactNode } from "react";
 import type { ServiceState } from "../lib/types";
@@ -12,11 +12,13 @@ interface AppShellProps {
 const navigation = [
   { to: "/", label: "Create", icon: Sparkles, hint: "Compose a new generation" },
   { to: "/library", label: "Library", icon: Archive, hint: "Listen to finished work" },
+  { to: "/mcp", label: "MCP", icon: PlugZap, hint: "Connect Claude Code or Codex" },
   { to: "/system", label: "System", icon: Settings2, hint: "Connection and API access" },
 ];
 
 function pageTitle(pathname: string) {
   if (pathname === "/library") return ["Library", "Shared collection"];
+  if (pathname === "/mcp") return ["MCP", "Agent music bridge"];
   if (pathname === "/system") return ["System", "Connection control"];
   return ["Create", "A quieter way to start a track"];
 }

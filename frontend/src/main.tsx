@@ -6,6 +6,7 @@ import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/layout.css";
 import "./styles/forge.css";
+import "./styles/mcp.css";
 import "./styles/states.css";
 
 createRoot(document.getElementById("root")!).render(

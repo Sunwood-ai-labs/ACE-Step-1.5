@@ -22,13 +22,15 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: all
+              device_ids:
+                - "${ACESTEP_GPU_DEVICE_ID:-0}"
               capabilities: [gpu]
     env_file:
       - path: .env
         required: false
     environment:
-      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_VISIBLE_DEVICES: "${ACESTEP_GPU_DEVICE_ID:-0}"
+      CUDA_VISIBLE_DEVICES: "${ACESTEP_GPU_DEVICE_ID:-0}"
       ACESTEP_MODE: api
       ACESTEP_LLM_BACKEND: ${ACESTEP_LLM_BACKEND:-pt}
       # The API reads ACESTEP_NO_INIT. Leave it true for a fast Forge-ready
@@ -121,13 +123,15 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: all
+              device_ids:
+                - "${ACESTEP_GPU_DEVICE_ID:-0}"
               capabilities: [gpu]
     env_file:
       - path: .env
         required: false
     environment:
-      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_VISIBLE_DEVICES: "${ACESTEP_GPU_DEVICE_ID:-0}"
+      CUDA_VISIBLE_DEVICES: "${ACESTEP_GPU_DEVICE_ID:-0}"
       ACESTEP_MODE: gradio
       ACESTEP_LLM_BACKEND: ${ACESTEP_LLM_BACKEND:-pt}
       ACESTEP_INIT_SERVICE: ${ACESTEP_INIT_SERVICE:-true}

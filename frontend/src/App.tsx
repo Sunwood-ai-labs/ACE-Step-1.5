@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
 import { LibraryPage } from "./pages/LibraryPage";
 import { ForgePage } from "./pages/ForgePage";
+import { McpPage } from "./pages/McpPage";
 import { SystemPage } from "./pages/SystemPage";
 import { useWorkspace } from "./lib/useWorkspace";
 
@@ -12,6 +13,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<ForgePage workspace={workspace} />} />
         <Route path="/library" element={<LibraryPage workspace={workspace} />} />
+        <Route path="/mcp" element={<McpPage />} />
         <Route path="/system" element={<SystemPage workspace={workspace} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
