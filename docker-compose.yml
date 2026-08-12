@@ -1,17 +1,13 @@
 # =============================================================================
-# ACE-Step 1.5 — Docker Compose (generic CUDA)
+# ACE-Step 1.5 — React Studio + API Compose stack
 # =============================================================================
 #
-# Usage:
-#   docker compose up              # Start Gradio UI (default)
-#   docker compose up --build      # Build and start
-#   docker compose up -d           # Run in background
-#   docker compose down            # Stop
-#   docker compose logs -f         # View logs
+# Primary UI:  http://localhost:3000
+# API:         http://localhost:8001 (useful for scripts and integrations)
+# Legacy UI:   docker compose --profile legacy up acestep-gradio
 #
-#   # Start REST API server instead:
-#   ACESTEP_MODE=api docker compose up
-#
+# The Studio service proxies /api/* to the API container, so the browser never
+# needs a second origin or a CORS exception.
 # =============================================================================
 
 services:
@@ -19,10 +15,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/ace-step/ace-step-1.5:latest
-    container_name: acestep
-
-    # ---- GPU access ----
+    image: ghcr.io/sunwood-ai-labs/ace-step-1.5:local
+    container_name: acestep-api
     deploy:
       resources:
         reservations:
@@ -30,43 +24,94 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-
-    # ---- Environment ----
     env_file:
       - path: .env
         required: false
     environment:
-      - NVIDIA_VISIBLE_DEVICES=all
-      - ACESTEP_MODE=${ACESTEP_MODE:-gradio}
-      - ACESTEP_LLM_BACKEND=${ACESTEP_LLM_BACKEND:-pt}
-      - ACESTEP_INIT_SERVICE=${ACESTEP_INIT_SERVICE:-true}
-      - ACESTEP_CONFIG_PATH=${ACESTEP_CONFIG_PATH:-acestep-v15-turbo}
-      - ACESTEP_LM_MODEL_PATH=${ACESTEP_LM_MODEL_PATH:-acestep-5Hz-lm-4B}
-      - ACESTEP_EXTRA_ARGS=${ACESTEP_EXTRA_ARGS:-}
-      - TOKENIZERS_PARALLELISM=false
-
-    # ---- Ports ----
+      NVIDIA_VISIBLE_DEVICES: all
+      ACESTEP_MODE: api
+      ACESTEP_LLM_BACKEND: ${ACESTEP_LLM_BACKEND:-pt}
+      # The API reads ACESTEP_NO_INIT. Leave it true for a fast Studio-ready
+      # server; set it false in .env to eagerly load models at startup.
+      ACESTEP_NO_INIT: ${ACESTEP_NO_INIT:-true}
+      ACESTEP_CONFIG_PATH: ${ACESTEP_CONFIG_PATH:-acestep-v15-turbo}
+      ACESTEP_LM_MODEL_PATH: ${ACESTEP_LM_MODEL_PATH:-acestep-5Hz-lm-4B}
+      ACESTEP_EXTRA_ARGS: ${ACESTEP_EXTRA_ARGS:-}
+      TOKENIZERS_PARALLELISM: "false"
     ports:
-      - "${GRADIO_PORT:-7860}:7860"
       - "${API_PORT:-8001}:8001"
-
-    # ---- Persistent volumes ----
     volumes:
       - ./checkpoints:/app/checkpoints
       - hf_cache:/root/.cache/huggingface
       - ./gradio_outputs:/app/gradio_outputs
       - ./output:/app/output
-
-    # ---- Shared memory for PyTorch DataLoader ----
     shm_size: "2gb"
-
     restart: unless-stopped
-
     healthcheck:
-      test: >-
-        curl -sf http://localhost:7860/ > /dev/null 2>&1 ||
-        curl -sf http://localhost:8001/health > /dev/null 2>&1 ||
-        exit 1
+      test: ["CMD-SHELL", "curl -sf http://localhost:8001/health > /dev/null"]
+      interval: 30s
+      timeout: 10s
+      start_period: 300s
+      retries: 3
+
+  studio:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: ghcr.io/sunwood-ai-labs/ace-step-studio:local
+    container_name: acestep-studio
+    depends_on:
+      acestep:
+        condition: service_healthy
+    ports:
+      - "${STUDIO_PORT:-3000}:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+  # The original bundled Gradio UI is preserved, but is opt-in so it does not
+  # compete with the API model worker used by Studio.
+  acestep-gradio:
+    profiles: ["legacy"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/sunwood-ai-labs/ace-step-1.5:local
+    container_name: acestep-gradio
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      ACESTEP_MODE: gradio
+      ACESTEP_LLM_BACKEND: ${ACESTEP_LLM_BACKEND:-pt}
+      ACESTEP_INIT_SERVICE: ${ACESTEP_INIT_SERVICE:-true}
+      ACESTEP_CONFIG_PATH: ${ACESTEP_CONFIG_PATH:-acestep-v15-turbo}
+      ACESTEP_LM_MODEL_PATH: ${ACESTEP_LM_MODEL_PATH:-acestep-5Hz-lm-4B}
+      ACESTEP_EXTRA_ARGS: ${ACESTEP_EXTRA_ARGS:-}
+      TOKENIZERS_PARALLELISM: "false"
+    ports:
+      - "${GRADIO_PORT:-7860}:7860"
+    volumes:
+      - ./checkpoints:/app/checkpoints
+      - hf_cache:/root/.cache/huggingface
+      - ./gradio_outputs:/app/gradio_outputs
+      - ./output:/app/output
+    shm_size: "2gb"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:7860/ > /dev/null"]
       interval: 30s
       timeout: 10s
       start_period: 300s
@@ -74,3 +119,13 @@ services:
 
 volumes:
   hf_cache:
+
+# Docker Desktop can exhaust its automatic bridge-network pool when many local
+# projects coexist. Keep this stack deterministic while allowing an override in
+# .env when 172.16.42.0/24 is already routed in a particular environment.
+networks:
+  default:
+    name: ace-step-studio-network
+    ipam:
+      config:
+        - subnet: ${ACESTEP_DOCKER_SUBNET:-172.16.42.0/24}

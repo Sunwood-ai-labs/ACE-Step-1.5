@@ -118,7 +118,25 @@ uv run acestep
 uv run acestep-api
 ```
 
-Open http://localhost:7860 (Gradio) or http://localhost:8001 (API).
+### React Studio with Docker Compose
+
+The fork includes a new React Router + Vite workstation that talks to the
+official REST API through a same-origin `/api` proxy.
+
+```bash
+# Builds the API and the Studio UI, then serves Studio at localhost:3000
+docker compose up --build
+```
+
+Open <http://localhost:3000>. The REST API remains available on port `8001`
+for scripts and integrations. The bundled Gradio UI is preserved as an opt-in
+legacy profile: `docker compose --profile legacy up acestep-gradio`.
+
+See [React Studio](./docs/en/REACT_STUDIO.md) for architecture, local API-token
+handling, development commands, and accessibility notes.
+
+For the direct `uv` commands above, open http://localhost:7860 (Gradio) or
+http://localhost:8001 (API).
 
 > 📦 **Windows users:** A [portable package](https://files.acemusic.ai/acemusic/win/ACE-Step-1.5.7z) with pre-installed dependencies is available. See [Installation Guide](./docs/en/INSTALL.md#-windows-portable-package).
 

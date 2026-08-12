@@ -8,18 +8,18 @@
 # Build:
 #   docker build -t acestep .
 #
-# Run (Gradio UI — default):
+# Run the API backing the React workstation (default):
 #   docker run --gpus all -it --rm \
-#     -p 7860:7860 \
+#     -p 8001:8001 \
 #     -v $(pwd)/checkpoints:/app/checkpoints \
 #     -v $(pwd)/gradio_outputs:/app/gradio_outputs \
 #     acestep
 #
-# Run (REST API server):
+# Run the bundled Gradio UI explicitly:
 #   docker run --gpus all -it --rm \
-#     -p 8001:8001 \
+#     -p 7860:7860 \
 #     -v $(pwd)/checkpoints:/app/checkpoints \
-#     -e ACESTEP_MODE=api \
+#     -e ACESTEP_MODE=gradio \
 #     acestep
 #
 # =============================================================================
@@ -78,10 +78,15 @@ RUN mkdir -p /app/checkpoints /app/gradio_outputs /app/output
 ENV GRADIO_SERVER_NAME=0.0.0.0
 ENV ACESTEP_API_HOST=0.0.0.0
 
-# Default startup mode: "gradio" for the web UI, "api" for the REST server
-ENV ACESTEP_MODE=gradio
+# Default startup mode: "api" for the React workstation. The bundled Gradio
+# UI remains available through the Compose `legacy` profile.
+ENV ACESTEP_MODE=api
 
-# Auto-initialize models on startup
+# Keep the REST API responsive while models are downloaded/loaded on the first
+# generation request. This setting is consumed by `acestep.api_server`.
+ENV ACESTEP_NO_INIT=true
+
+# The legacy Gradio entrypoint still uses this explicit eager-init switch.
 ENV ACESTEP_INIT_SERVICE=true
 
 # Default models
@@ -150,6 +155,8 @@ else
 fi
 ENTRYPOINT_EOF
 
-RUN chmod +x /app/docker-entrypoint.sh
+# Dockerfile heredocs inherit the host checkout's line endings. Normalize this
+# generated Linux entrypoint so a Windows CRLF checkout cannot produce bash\r.
+RUN sed -i 's/\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
