@@ -1,0 +1,30 @@
+# =============================================================================
+# ACE-Step Forge — lightweight Streamable HTTP MCP gateway
+# =============================================================================
+#
+# This sidecar has no model weights or GPU dependency. It delegates each call
+# to the API service over Docker networking, so it can start quickly and share
+# the API's generation queue and persistent Library.
+# =============================================================================
+
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir \
+        "httpx==0.28.1" \
+        "loguru==0.7.3" \
+        "mcp==2.0.0"
+
+COPY acestep/__init__.py /app/acestep/__init__.py
+COPY acestep/mcp_api_client.py /app/acestep/mcp_api_client.py
+COPY acestep/mcp_config.py /app/acestep/mcp_config.py
+COPY acestep/mcp_server.py /app/acestep/mcp_server.py
+COPY acestep/mcp_tools.py /app/acestep/mcp_tools.py
+
+EXPOSE 8002
+
+ENTRYPOINT ["python", "-m", "acestep.mcp_server"]

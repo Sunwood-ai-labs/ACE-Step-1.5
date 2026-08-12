@@ -139,6 +139,38 @@ legacy profile: `docker compose --profile legacy up acestep-gradio`.
 See [ACE-Step Forge](./docs/en/REACT_FORGE.md) for architecture, local API-token
 handling, development commands, and accessibility notes.
 
+### Streamable HTTP MCP (Claude Code / Codex)
+
+Compose also starts a local-only MCP endpoint at
+<http://127.0.0.1:8002/mcp>. It uses the existing generation queue and writes
+completed audio to the same shared Library as Forge. Available tools are
+`generate_music`, `get_generation_status`, `wait_for_generation`,
+`list_music_library`, and `get_music_server_status`.
+
+```bash
+# Claude Code (local project scope)
+claude mcp add --transport http ace-step-forge http://127.0.0.1:8002/mcp
+
+# Codex CLI
+codex mcp add ace-step-forge --url http://127.0.0.1:8002/mcp
+```
+
+Set `ACESTEP_MCP_API_KEY` in `.env` to require a bearer token, then configure
+the same value in the client process:
+
+```powershell
+$env:ACESTEP_MCP_API_KEY = "replace-with-a-long-random-token"
+codex mcp add ace-step-forge --url http://127.0.0.1:8002/mcp `
+  --bearer-token-env-var ACESTEP_MCP_API_KEY
+claude mcp add --transport http ace-step-forge http://127.0.0.1:8002/mcp `
+  --header "Authorization: Bearer $env:ACESTEP_MCP_API_KEY"
+```
+
+The endpoint is bound to localhost by default; when exposing it over Tailscale,
+add the exact Tailnet hostname to `ACESTEP_MCP_ALLOWED_HOSTS` and set
+`ACESTEP_MCP_PUBLIC_API_BASE_URL` to the public API URL so returned audio links
+remain usable.
+
 For the direct `uv` commands above, open http://localhost:7860 (Gradio) or
 http://localhost:8001 (API).
 

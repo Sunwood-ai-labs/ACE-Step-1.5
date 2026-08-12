@@ -73,6 +73,40 @@ services:
       start_period: 10s
       retries: 3
 
+  # A local-only Streamable HTTP MCP gateway. It delegates generation to the
+  # existing API service, so completed tracks use the same shared Library.
+  acestep-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    image: ghcr.io/sunwood-ai-labs/ace-step-forge-mcp:local
+    container_name: acestep-mcp
+    depends_on:
+      acestep:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      ACESTEP_MCP_BIND_HOST: 0.0.0.0
+      ACESTEP_MCP_PORT: 8002
+      ACESTEP_MCP_API_BASE_URL: http://acestep:8001
+      # Override this in .env when the API has a non-default public URL/port.
+      ACESTEP_MCP_PUBLIC_API_BASE_URL: ${ACESTEP_MCP_PUBLIC_API_BASE_URL:-http://localhost:8001}
+      ACESTEP_MCP_ALLOWED_HOSTS: ${ACESTEP_MCP_ALLOWED_HOSTS:-localhost:*,127.0.0.1:*,[::1]:*}
+      ACESTEP_MCP_ALLOWED_ORIGINS: ${ACESTEP_MCP_ALLOWED_ORIGINS:-http://localhost:*,http://127.0.0.1:*,http://[::1]:*}
+    # MCP is deliberately local-only. Use Tailscale Serve/ACLs if it needs to
+    # be consumed by another Tailnet device.
+    ports:
+      - "127.0.0.1:${MCP_PORT:-8002}:8002"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health', timeout=2).close()"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
   # The original bundled Gradio UI is preserved, but is opt-in so it does not
   # compete with the API model worker used by Forge.
   acestep-gradio:

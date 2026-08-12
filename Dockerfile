@@ -22,6 +22,12 @@
 #     -e ACESTEP_MODE=gradio \
 #     acestep
 #
+# Run the Streamable HTTP MCP gateway explicitly:
+#   docker run --rm -p 8002:8002 \
+#     -e ACESTEP_MODE=mcp \
+#     -e ACESTEP_MCP_API_BASE_URL=http://host.docker.internal:8001 \
+#     acestep
+#
 # =============================================================================
 
 # ==================== Build arguments ====================
@@ -98,8 +104,8 @@ ENV ACESTEP_LLM_BACKEND=pt
 ENV TOKENIZERS_PARALLELISM=false
 
 # ==================== Ports ====================
-# 7860 = Gradio web UI | 8001 = REST API server
-EXPOSE 7860 8001
+# 7860 = Gradio web UI | 8001 = REST API server | 8002 = Streamable HTTP MCP
+EXPOSE 7860 8001 8002
 
 # ==================== Health check ====================
 HEALTHCHECK --interval=60s --timeout=10s --start-period=120s --retries=3 \
@@ -144,7 +150,10 @@ if [ "${ACESTEP_MODE}" = "api" ]; then
         --host "${ACESTEP_API_HOST:-0.0.0.0}" \
         --port "${ACESTEP_API_PORT:-8001}" \
         ${ACESTEP_EXTRA_ARGS:-}
-else
+elif [ "${ACESTEP_MODE}" = "mcp" ]; then
+    echo "Starting Streamable HTTP MCP server on ${ACESTEP_MCP_BIND_HOST:-0.0.0.0}:${ACESTEP_MCP_PORT:-8002} ..."
+    exec uv run python -m acestep.mcp_server
+elif [ "${ACESTEP_MODE}" = "gradio" ]; then
     echo "Starting Gradio UI on 0.0.0.0:${GRADIO_PORT:-7860} ..."
     exec uv run python -m acestep.acestep_v15_pipeline \
         --server-name "${GRADIO_SERVER_NAME:-0.0.0.0}" \
@@ -152,6 +161,9 @@ else
         --backend "${ACESTEP_LLM_BACKEND:-pt}" \
         ${INIT_ARGS} \
         ${ACESTEP_EXTRA_ARGS:-}
+else
+    echo "Unknown ACESTEP_MODE: ${ACESTEP_MODE}" >&2
+    exit 2
 fi
 ENTRYPOINT_EOF
 
