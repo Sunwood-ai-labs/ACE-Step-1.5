@@ -1,4 +1,4 @@
-# ACE-Step Studio (React Router + Vite)
+# ACE-Step Forge (React Router + Vite)
 
 `frontend/` is a new, independently built Web UI for the official ACE-Step
 1.5 REST API. It replaces neither the Python pipeline nor the bundled Gradio
@@ -11,17 +11,17 @@ available through the Compose `legacy` profile.
 docker compose up --build
 ```
 
-Open `http://localhost:3000`. Studio proxies every `/api/*` request to the
+Open `http://localhost:3000`. Forge proxies every `/api/*` request to the
 `acestep` container at port `8001`; no browser-side API host or CORS exception
 is needed. `http://localhost:8001` remains exposed for scripts.
 
-The API uses lazy model initialization by default, so Studio can become
+The API uses lazy model initialization by default, so Forge can become
 available before the first checkpoint download/load. Set `ACESTEP_NO_INIT=false`
 in `.env` if you prefer eager initialization before the API health check passes.
 
 If `3000` is already used on your machine, pick another host port without
-changing the image: `STUDIO_PORT=3002 docker compose up --build`. The Compose
-network uses `172.16.42.0/24` by default to avoid Docker Desktop's automatic
+changing the image: `FORGE_PORT=3002 docker compose up --build`. The Compose
+network uses `172.16.43.0/24` by default to avoid Docker Desktop's automatic
 bridge-pool exhaustion; set `ACESTEP_DOCKER_SUBNET` only if that range conflicts
 with a route on your own network.
 
@@ -44,7 +44,7 @@ VITE_API_TARGET=http://localhost:8001 npm run dev
 
 ## API boundary
 
-Studio intentionally uses the existing public API contract:
+Forge intentionally uses the existing public API contract:
 
 | UI behavior | ACE-Step endpoint |
 | --- | --- |
@@ -112,8 +112,8 @@ inventory above against a local API or mock server before a release.
 
 ```bash
 docker compose config --quiet
-docker compose --progress plain build studio
-docker build --target test -t ace-step-studio-test ./frontend
+docker compose --progress plain build forge
+docker build --target test -t ace-step-forge-ui-test ./frontend
 ```
 
 ## Sources

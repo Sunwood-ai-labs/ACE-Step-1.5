@@ -1,12 +1,12 @@
 ---
 layout: home
 hero:
-  name: ACE-Step 1.5
-  text: Open-Source Music Generation
-  tagline: Commercial-grade music generation on consumer hardware. Under 2s per song on A100, <4GB VRAM.
+  name: ACE-Step Forge
+  text: Local-first Music Workspace
+  tagline: A focused React workspace powered by the ACE-Step 1.5 open-source music model.
   image:
     src: /logo.png
-    alt: ACE-Step
+    alt: ACE-Step Forge
   actions:
     - theme: brand
       text: Get Started
@@ -16,7 +16,7 @@ hero:
       link: /en/Tutorial
     - theme: alt
       text: GitHub
-      link: https://github.com/ace-step/ACE-Step-1.5
+      link: https://github.com/Sunwood-ai-labs/ace-step-forge
 
 features:
   - icon: "&#9889;"

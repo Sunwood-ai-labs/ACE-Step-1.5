@@ -1,4 +1,4 @@
-# CodeQL configuration for ACE-Step-1.5
+# CodeQL configuration for ACE-Step Forge
 #
 # This project is a local Gradio desktop application for music generation
 # and LoRA/LoKr fine-tuning. It is NOT a web service exposed to the internet.

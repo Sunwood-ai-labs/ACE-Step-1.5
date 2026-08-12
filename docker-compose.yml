@@ -1,12 +1,12 @@
 # =============================================================================
-# ACE-Step 1.5 — React Studio + API Compose stack
+# ACE-Step Forge — React workspace + API Compose stack
 # =============================================================================
 #
 # Primary UI:  http://localhost:3000
 # API:         http://localhost:8001 (useful for scripts and integrations)
 # Legacy UI:   docker compose --profile legacy up acestep-gradio
 #
-# The Studio service proxies /api/* to the API container, so the browser never
+# The Forge service proxies /api/* to the API container, so the browser never
 # needs a second origin or a CORS exception.
 # =============================================================================
 
@@ -15,7 +15,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/sunwood-ai-labs/ace-step-1.5:local
+    image: ghcr.io/sunwood-ai-labs/ace-step-forge:local
     container_name: acestep-api
     deploy:
       resources:
@@ -31,7 +31,7 @@ services:
       NVIDIA_VISIBLE_DEVICES: all
       ACESTEP_MODE: api
       ACESTEP_LLM_BACKEND: ${ACESTEP_LLM_BACKEND:-pt}
-      # The API reads ACESTEP_NO_INIT. Leave it true for a fast Studio-ready
+      # The API reads ACESTEP_NO_INIT. Leave it true for a fast Forge-ready
       # server; set it false in .env to eagerly load models at startup.
       ACESTEP_NO_INIT: ${ACESTEP_NO_INIT:-true}
       ACESTEP_CONFIG_PATH: ${ACESTEP_CONFIG_PATH:-acestep-v15-turbo}
@@ -54,17 +54,17 @@ services:
       start_period: 300s
       retries: 3
 
-  studio:
+  forge:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    image: ghcr.io/sunwood-ai-labs/ace-step-studio:local
-    container_name: acestep-studio
+    image: ghcr.io/sunwood-ai-labs/ace-step-forge-ui:local
+    container_name: acestep-forge
     depends_on:
       acestep:
         condition: service_healthy
     ports:
-      - "${STUDIO_PORT:-3000}:8080"
+      - "${FORGE_PORT:-3000}:8080"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/healthz"]
@@ -74,13 +74,13 @@ services:
       retries: 3
 
   # The original bundled Gradio UI is preserved, but is opt-in so it does not
-  # compete with the API model worker used by Studio.
+  # compete with the API model worker used by Forge.
   acestep-gradio:
     profiles: ["legacy"]
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/sunwood-ai-labs/ace-step-1.5:local
+    image: ghcr.io/sunwood-ai-labs/ace-step-forge:local
     container_name: acestep-gradio
     deploy:
       resources:
@@ -122,10 +122,10 @@ volumes:
 
 # Docker Desktop can exhaust its automatic bridge-network pool when many local
 # projects coexist. Keep this stack deterministic while allowing an override in
-# .env when 172.16.42.0/24 is already routed in a particular environment.
+# .env when 172.16.43.0/24 is already routed in a particular environment.
 networks:
   default:
-    name: ace-step-studio-network
+    name: ace-step-forge-network
     ipam:
       config:
-        - subnet: ${ACESTEP_DOCKER_SUBNET:-172.16.42.0/24}
+        - subnet: ${ACESTEP_DOCKER_SUBNET:-172.16.43.0/24}

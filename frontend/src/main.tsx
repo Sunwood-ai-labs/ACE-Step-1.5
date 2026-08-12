@@ -5,7 +5,7 @@ import App from "./App";
 import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/layout.css";
-import "./styles/studio.css";
+import "./styles/forge.css";
 import "./styles/states.css";
 
 createRoot(document.getElementById("root")!).render(

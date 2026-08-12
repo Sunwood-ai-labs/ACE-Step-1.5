@@ -34,7 +34,7 @@ export function AppShell({ children, serviceState, activeCount }: AppShellProps)
           <div className="brand-mark" aria-hidden="true"><span>A</span><i /></div>
           <div>
             <strong>ACE / STEP</strong>
-            <span>STUDIO 1.5</span>
+            <span>FORGE 1.5</span>
           </div>
         </div>
 
@@ -54,7 +54,7 @@ export function AppShell({ children, serviceState, activeCount }: AppShellProps)
             {serviceLabel}
           </div>
           <p>All jobs are rendered by your local ACE-Step service.</p>
-          <a href="https://github.com/Sunwood-ai-labs/ACE-Step-1.5" target="_blank" rel="noreferrer">
+          <a href="https://github.com/Sunwood-ai-labs/ace-step-forge" target="_blank" rel="noreferrer">
             <CircleHelp size={15} aria-hidden="true" /> Source &amp; API
           </a>
         </div>

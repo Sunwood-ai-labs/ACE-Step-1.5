@@ -1,5 +1,5 @@
-<h1 align="center">ACE-Step 1.5</h1>
-<h1 align="center">Pushing the Boundaries of Open-Source Music Generation</h1>
+<h1 align="center">ACE-Step Forge</h1>
+<h1 align="center">A local-first React workspace powered by ACE-Step 1.5</h1>
 <p align="center">
     <a href="https://acemusic.ai">ACEMusic</a> |
     <a href="https://ace-step.github.io/ace-step-v1.5.github.io/">Project</a> |
@@ -10,6 +10,10 @@
     <a href="https://arxiv.org/abs/2602.00744">Technical Report</a> |
     <a href="https://github.com/ace-step/awesome-ace-step">Awesome ACE-Step</a>
 </p>
+
+> **Fork notice:** ACE-Step Forge is a separately maintained workspace fork of
+> [ace-step/ACE-Step-1.5](https://github.com/ace-step/ACE-Step-1.5). It keeps
+> the upstream model, API, and Gradio UI while adding the Forge web interface.
 
 <p align="center">
     <img src="./assets/organization_logos.png" height="80" alt="StepFun Logo" style="vertical-align: middle;">
@@ -107,8 +111,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh          # macOS / Linux
 # powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"  # Windows
 
 # 2. Clone & install
-git clone https://github.com/ACE-Step/ACE-Step-1.5.git
-cd ACE-Step-1.5
+git clone https://github.com/Sunwood-ai-labs/ace-step-forge.git
+cd ace-step-forge
 uv sync
 
 # 3. Launch Gradio UI (models auto-download on first run)
@@ -118,13 +122,13 @@ uv run acestep
 uv run acestep-api
 ```
 
-### React Studio with Docker Compose
+### ACE-Step Forge with Docker Compose
 
-The fork includes a new React Router + Vite workstation that talks to the
+The fork includes the React Router + Vite Forge workspace, which talks to the
 official REST API through a same-origin `/api` proxy.
 
 ```bash
-# Builds the API and the Studio UI, then serves Studio at localhost:3000
+# Builds the API and Forge UI, then serves Forge at localhost:3000
 docker compose up --build
 ```
 
@@ -132,7 +136,7 @@ Open <http://localhost:3000>. The REST API remains available on port `8001`
 for scripts and integrations. The bundled Gradio UI is preserved as an opt-in
 legacy profile: `docker compose --profile legacy up acestep-gradio`.
 
-See [React Studio](./docs/en/REACT_STUDIO.md) for architecture, local API-token
+See [ACE-Step Forge](./docs/en/REACT_FORGE.md) for architecture, local API-token
 handling, development commands, and accessibility notes.
 
 For the direct `uv` commands above, open http://localhost:7860 (Gradio) or

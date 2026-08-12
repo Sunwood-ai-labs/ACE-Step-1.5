@@ -5,17 +5,17 @@ import { ServicePanel } from "../components/ServicePanel";
 import { TaskQueue } from "../components/TaskQueue";
 import type { Workspace } from "../lib/useWorkspace";
 
-interface StudioPageProps {
+interface ForgePageProps {
   workspace: Workspace;
 }
 
-export function StudioPage({ workspace }: StudioPageProps) {
+export function ForgePage({ workspace }: ForgePageProps) {
   const { tasks, metrics, notice, ...controls } = workspace;
   return (
     <div className="page-stack">
       {notice && <div className="notice-banner" role="status"><Radio size={17} aria-hidden="true" />{notice}</div>}
       <MetricStrip {...metrics} />
-      <div className="studio-grid">
+      <div className="forge-grid">
         <Composer models={controls.models} isSubmitting={controls.isSubmitting} serviceState={controls.serviceState} onSubmit={controls.submit} />
         <aside className="inspector-column" aria-label="Generation service details">
           <ServicePanel state={controls.serviceState} health={controls.health} onRefresh={controls.refreshService} />
