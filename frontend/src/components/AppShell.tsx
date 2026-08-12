@@ -1,4 +1,4 @@
-import { Activity, Archive, CircleHelp, PlugZap, Settings2, Sparkles } from "lucide-react";
+import { Activity, Archive, PlugZap, Settings2, Sparkles } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import type { ReactNode } from "react";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -30,7 +30,7 @@ export function AppShell({ children, serviceState, activeCount }: AppShellProps)
       <a className="skip-link" href="#main-content">{copy.skipLink}</a>
       <aside className="sidebar" aria-label={copy.navigationLabel}>
         <div className="brand-lockup">
-          <div className="brand-mark" aria-hidden="true"><span>A</span><i /></div>
+          <img className="brand-mark" src="/ace-step-forge-icon.png" alt="" aria-hidden="true" />
           <div>
             <strong>ACE / STEP</strong>
             <span>FORGE 1.5</span>
@@ -53,8 +53,9 @@ export function AppShell({ children, serviceState, activeCount }: AppShellProps)
             {serviceLabel}
           </div>
           <p>{copy.localServiceNote}</p>
-          <a href="https://github.com/Sunwood-ai-labs/ace-step-forge" target="_blank" rel="noreferrer">
-            <CircleHelp size={15} aria-hidden="true" /> {copy.sourceApi}
+          <a className="footer-brand-link" href="https://github.com/Sunwood-ai-labs/ace-step-forge" target="_blank" rel="noreferrer">
+            <img className="footer-brand-icon" src="/ace-step-forge-icon.png" alt="" aria-hidden="true" />
+            {copy.sourceApi}
           </a>
         </div>
       </aside>

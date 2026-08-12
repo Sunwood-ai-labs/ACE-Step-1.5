@@ -164,3 +164,8 @@ is released under the [MIT License](./LICENSE). Upstream ACE-Step code and model
 documentation remain credited to the ACE-Step team; see the original
 [ACE-Step 1.5 repository](https://github.com/ace-step/ACE-Step-1.5) for its
 research, model, and ecosystem materials.
+
+<p align="center">
+  <img src="./docs/public/logo.png" width="52" alt="ACE-Step Forge icon"><br>
+  <sub>ACE-Step Forge icon</sub>
+</p>
