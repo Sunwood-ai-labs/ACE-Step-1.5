@@ -4,9 +4,6 @@ hero:
   name: ACE-Step 1.5
   text: 开源音乐生成
   tagline: 消费级硬件上的商业级音乐生成。A100 上每首歌不到 2 秒，显存需求 <4GB。
-  image:
-    src: /logo.png
-    alt: ACE-Step
   actions:
     - theme: brand
       text: 安装指南

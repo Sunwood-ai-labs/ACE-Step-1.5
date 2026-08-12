@@ -4,9 +4,6 @@ hero:
   name: ACE-Step Forge
   text: Local-first music generation, kept together.
   tagline: A React workspace and Streamable HTTP MCP gateway built around the open-source ACE-Step 1.5 engine.
-  image:
-    src: /logo.png
-    alt: ACE-Step Forge
   actions:
     - theme: brand
       text: Forge overview

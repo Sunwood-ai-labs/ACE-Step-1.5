@@ -4,9 +4,6 @@ hero:
   name: ACE-Step Forge
   text: A local music workspace that keeps the take.
   tagline: Generate with ACE-Step 1.5, retain completed audio in a shared Library, and connect coding agents through MCP.
-  image:
-    src: /logo.png
-    alt: ACE-Step Forge
   actions:
     - theme: brand
       text: Forge overview

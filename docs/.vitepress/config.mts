@@ -74,7 +74,6 @@ export default defineConfig({
   },
 
   themeConfig: {
-    logo: '/logo.png',
     nav: navEN(),
     sidebar: sidebarEN(),
 
