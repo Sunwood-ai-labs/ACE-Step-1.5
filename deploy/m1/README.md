@@ -1,27 +1,21 @@
-# Apple Silicon (M1) CI/CD deployment
+# Apple Silicon (M1) all-in-one CI/CD deployment
 
-This deployment runs the Forge **React/Nginx workspace** on an Apple Silicon
-Mac and forwards its same-origin `/api` requests to an existing ACE-Step API
-host over Tailscale. GitHub Actions deploys directly on a self-hosted runner
-installed on that Mac; the initial runner setup can be performed over SSH.
+The M1 deployment is a complete Forge runtime on one Mac:
 
-The current ACE-Step backend image is built from `nvidia/cuda` and reserves an
-NVIDIA device in Compose. It is not the right image for an M1 Mac. The M1
-workflow therefore deploys the ARM64 UI edge only; music generation and the
-shared Library remain on the NVIDIA host.
+- React/Nginx UI in an ARM64 container
+- ACE-Step API natively on Apple Silicon via PyTorch MPS + MLX
+- Streamable HTTP MCP natively on the same Mac
+- generation outputs and the shared Library on the same filesystem
+
+Nothing is forwarded to the NVIDIA workstation. The M1 is the runtime. The
+NVIDIA Docker image remains available for a separate GPU deployment, but it is
+not part of this M1 workflow.
 
 ## GitHub configuration
 
-Create this repository Actions secret (or put it in the `m1-production`
-environment):
-
-| Name | Value |
-| --- | --- |
-| `M1_API_UPSTREAM` | GPU API address as `host:port`, for example `100.92.144.53:8001` (no scheme) |
-
 Set the repository variable `M1_DEPLOY_ENABLED` to `true` to enable automatic
-deployment on pushes to `main` that touch the UI or deployment files. A manual
-`workflow_dispatch` run can deploy without that variable.
+deployment on pushes to `main` that touch the API, UI, MCP, or M1 deployment
+files. A manual `workflow_dispatch` run can deploy without that variable.
 
 The workflow uses the automatically provided `GITHUB_TOKEN` to publish and
 pull `ghcr.io/<owner>/ace-step-forge-ui:main`; no separate registry token is
@@ -31,14 +25,17 @@ needed.
 
 `.github/workflows/deploy-m1.yml`:
 
-1. Builds the `frontend/` image for `linux/amd64` and `linux/arm64`.
-2. Publishes immutable SHA and moving `main` tags to GHCR.
-3. Runs the deploy job on the labeled `self-hosted,m1,arm64` runner on the Mac.
-4. Copies `deploy/m1/compose.yml`, logs into GHCR, and restarts the UI.
-5. Polls `http://127.0.0.1:3003/healthz` on the Mac before succeeding.
+1. Builds and publishes the ARM64 UI image (the GHCR tag is multi-arch).
+2. Runs on the labeled `self-hosted,m1,arm64` runner installed on the Mac.
+3. Syncs the repository into `~/ace-step-forge-native` while preserving model
+   checkpoints and generated outputs.
+4. Installs the locked Python environment, native `ffmpeg`, and two LaunchAgents
+   for the API and MCP services.
+5. Starts the ARM64 UI edge and verifies UI, API, and MCP health on the Mac.
 
-The Mac needs Docker Desktop with the Compose plugin, an online GitHub Actions
-runner, and Tailscale access to the GPU host.
+The first sync downloads the ACE-Step weights into the native checkpoint
+directory. Keep at least 15 GB free for the turbo model, VAE, embedding, 5 Hz
+LM, Python environment, and generated audio.
 
 ### Install the M1 runner once
 
@@ -53,17 +50,16 @@ After the workflow succeeds:
 ```powershell
 ssh <m1-user>@<m1-host> 'cd ~/ace-step-forge && docker compose ps'
 curl http://<m1-host>:3003/healthz
+curl http://<m1-host>:3003/api/health
+curl http://<m1-host>:8002/health
 ```
 
-Open `http://<m1-host>:3003`, check the **System** view, and submit a short
-generation. The browser talks to the M1 UI, while Nginx forwards `/api` and
-audio/library paths to `M1_API_UPSTREAM`.
-
-The Mac must be able to reach the GPU host on the configured port. If the
-health page loads but generation fails, test the API path from the Mac and
-check the GPU host firewall/Tailscale ACLs before changing the UI deployment.
+Open `http://<m1-host>:3003`, submit a short generation, and confirm that the
+finished track appears in **Library**. The UI, API, audio file, and MCP gateway
+all run on the same M1. The Tailnet address is private to the Tailnet.
 
 ## Current limitation
 
-This is an edge/UI deployment. Running the ACE-Step model itself on the M1
-requires a separate CPU/MPS backend image and is not provided by this workflow.
+Apple Silicon uses MPS/MLX rather than CUDA. Performance and model-memory
+behavior differ from the RTX 3060 profile; the M1 workflow intentionally does
+not reserve an NVIDIA device or contact the GPU workstation.

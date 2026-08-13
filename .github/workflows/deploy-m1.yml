@@ -1,19 +1,22 @@
-name: Build and deploy Forge UI to M1
+name: Build and deploy Forge full stack to M1
 
 on:
   push:
     branches:
       - main
     paths:
+      - "acestep/**"
       - "frontend/**"
       - "deploy/m1/**"
+      - "Dockerfile"
+      - "Dockerfile.mcp"
+      - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/deploy-m1.yml"
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
-  # Docker repository names must be lowercase; the GitHub owner is displayed
-  # as Sunwood-ai-labs but GHCR stores it in lowercase.
   IMAGE_NAME: ghcr.io/sunwood-ai-labs/ace-step-forge-ui
 
 permissions:
@@ -41,7 +44,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and publish UI image
+      - name: Build and publish UI
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
@@ -55,38 +58,66 @@ jobs:
           cache-to: type=gha,mode=max,scope=forge-ui
 
   deploy-m1:
-    name: Deploy UI on the M1 runner
+    name: Deploy UI, API, and MCP on M1
     needs: build-ui
-    # Pushes are gated by a repository variable so an unconfigured fork does
-    # not fail every main build. Manual dispatch is always allowed to validate
-    # the configured runner and API secret.
     if: ${{ github.event_name == 'workflow_dispatch' || vars.M1_DEPLOY_ENABLED == 'true' }}
-    # The runner is installed on the target Mac. This keeps the deployment
-    # inside the Tailnet without exposing SSH or Docker to GitHub-hosted IPs.
+    # The runner is installed on the target Mac. All runtime components stay
+    # on this one machine; the API uses native MPS/MLX instead of CUDA.
     runs-on: [self-hosted, m1, arm64]
     environment:
       name: m1-production
     env:
-      # LaunchAgents on macOS do not inherit Docker Desktop's PATH.
-      PATH: /Applications/Docker.app/Contents/Resources/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
+      PATH: /Applications/Docker.app/Contents/Resources/bin:/Users/admin/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
+      NATIVE_ROOT: /Users/admin/ace-step-forge-native
     steps:
-      - name: Check out deployment manifest
+      - name: Check out full-stack sources
         uses: actions/checkout@v4
 
-      - name: Validate M1 deployment settings
-        env:
-          M1_API_UPSTREAM: ${{ secrets.M1_API_UPSTREAM }}
+      - name: Sync native MPS/MLX runtime
         shell: bash
         run: |
           set -euo pipefail
-          if [ -z "${M1_API_UPSTREAM}" ]; then
-            echo 'Missing required Actions secret: M1_API_UPSTREAM' >&2
-            exit 1
+          native="$NATIVE_ROOT"
+          mkdir -p "$native"
+          /usr/bin/rsync -a --delete \
+            --exclude '.venv/' \
+            --exclude 'checkpoints/' \
+            --exclude '.cache/' \
+            --exclude 'gradio_outputs/' \
+            --exclude 'output/' \
+            "$GITHUB_WORKSPACE/" "$native/"
+
+          if [ ! -x "$HOME/.local/bin/uv" ]; then
+            curl -LsSf https://astral.sh/uv/install.sh | sh
           fi
-          if ! printf '%s' "$M1_API_UPSTREAM" | grep -Eq '^[[:alnum:]._:-]+$'; then
-            echo 'M1_API_UPSTREAM must be a host:port value without a scheme.' >&2
-            exit 1
-          fi
+          "$HOME/.local/bin/uv" sync --frozen --no-dev --python 3.11 --project "$native"
+
+          # imageio-ffmpeg supplies a native arm64 ffmpeg binary without
+          # requiring Homebrew on the deployment Mac.
+          "$HOME/.local/bin/uv" pip install --python "$native/.venv/bin/python" imageio-ffmpeg
+          ffmpeg_path=$("$native/.venv/bin/python" -c 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())')
+          mkdir -p "$HOME/.local/bin"
+          ln -sf "$ffmpeg_path" "$HOME/.local/bin/ffmpeg"
+          chmod +x "$native/deploy/m1/"*.sh
+          "$native/deploy/m1/install-native-launchagents.sh"
+
+      - name: Verify native API and MCP
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8001/health >/dev/null && \
+               curl -fsS http://127.0.0.1:8002/health >/dev/null; then
+              echo 'Native ACE-Step API and MCP are healthy on M1'
+              break
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              tail -80 "$HOME/ace-step-native-api.log" || true
+              tail -80 "$HOME/ace-step-native-mcp.log" || true
+              exit 1
+            fi
+            sleep 2
+          done
 
       - name: Check Docker Desktop on M1
         shell: bash
@@ -95,9 +126,8 @@ jobs:
           docker version
           docker compose version
 
-      - name: Pull and restart UI on M1
+      - name: Pull and restart ARM64 UI edge
         env:
-          M1_API_UPSTREAM: ${{ secrets.M1_API_UPSTREAM }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_USER: ${{ github.actor }}
           IMAGE_REF: ${{ env.IMAGE_NAME }}:main
@@ -107,9 +137,8 @@ jobs:
           mkdir -p "$HOME/ace-step-forge"
           cp deploy/m1/compose.yml "$HOME/ace-step-forge/compose.yml"
 
-          # Keep upstream and image values local to the runner; neither is
-          # printed to the Actions log.
-          printf 'FORGE_IMAGE=%s\nFORGE_API_UPSTREAM=%s\nFORGE_PORT=3003\n' "$IMAGE_REF" "$M1_API_UPSTREAM" > "$HOME/ace-step-forge/.env"
+          # The UI and both native services are on this same Mac.
+          printf 'FORGE_IMAGE=%s\nFORGE_API_UPSTREAM=host.docker.internal:8001\nFORGE_PORT=3003\n' "$IMAGE_REF" > "$HOME/ace-step-forge/.env"
           chmod 600 "$HOME/ace-step-forge/.env"
 
           printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
@@ -120,8 +149,9 @@ jobs:
           docker logout ghcr.io >/dev/null 2>&1 || true
 
           for attempt in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:3003/healthz >/dev/null; then
-              echo 'Forge UI is healthy on M1'
+            if curl -fsS http://127.0.0.1:3003/healthz >/dev/null && \
+               curl -fsS http://127.0.0.1:3003/api/health >/dev/null; then
+              echo 'Forge UI, API, and MCP stack is healthy on M1'
               exit 0
             fi
             sleep 2

@@ -2,13 +2,14 @@ name: ace-step-forge-m1
 
 services:
   forge:
-    # The CI workflow publishes both linux/amd64 and linux/arm64 manifests.
+    # The UI edge is ARM64; the API and MCP run natively on this same Mac
+    # with MPS/MLX and are reached through Docker Desktop's host gateway.
     platform: linux/arm64
     image: ${FORGE_IMAGE:-ghcr.io/sunwood-ai-labs/ace-step-forge-ui:main}
     container_name: ace-step-forge-ui
     environment:
       # host:port only; the image's Nginx proxy adds http://.
-      FORGE_API_UPSTREAM: ${FORGE_API_UPSTREAM:?Set FORGE_API_UPSTREAM to the GPU host's host:port}
+      FORGE_API_UPSTREAM: ${FORGE_API_UPSTREAM:-host.docker.internal:8001}
     ports:
       # 3000 is commonly occupied by local developer tools on macOS.
       - "${FORGE_PORT:-3003}:8080"
