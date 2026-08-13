@@ -1,0 +1,130 @@
+name: Build and deploy Forge UI to M1
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/**"
+      - "deploy/m1/**"
+      - ".github/workflows/deploy-m1.yml"
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  # Docker repository names must be lowercase; the GitHub owner is displayed
+  # as Sunwood-ai-labs but GHCR stores it in lowercase.
+  IMAGE_NAME: ghcr.io/sunwood-ai-labs/ace-step-forge-ui
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-ui:
+    name: Build ARM64 UI image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish UI image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:main
+            ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+          cache-from: type=gha,scope=forge-ui
+          cache-to: type=gha,mode=max,scope=forge-ui
+
+  deploy-m1:
+    name: Deploy UI on the M1 runner
+    needs: build-ui
+    # Pushes are gated by a repository variable so an unconfigured fork does
+    # not fail every main build. Manual dispatch is always allowed to validate
+    # the configured runner and API secret.
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.M1_DEPLOY_ENABLED == 'true' }}
+    # The runner is installed on the target Mac. This keeps the deployment
+    # inside the Tailnet without exposing SSH or Docker to GitHub-hosted IPs.
+    runs-on: [self-hosted, m1, arm64]
+    environment:
+      name: m1-production
+    env:
+      # LaunchAgents on macOS do not inherit Docker Desktop's PATH.
+      PATH: /Applications/Docker.app/Contents/Resources/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin
+    steps:
+      - name: Check out deployment manifest
+        uses: actions/checkout@v4
+
+      - name: Validate M1 deployment settings
+        env:
+          M1_API_UPSTREAM: ${{ secrets.M1_API_UPSTREAM }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${M1_API_UPSTREAM}" ]; then
+            echo 'Missing required Actions secret: M1_API_UPSTREAM' >&2
+            exit 1
+          fi
+          if ! printf '%s' "$M1_API_UPSTREAM" | grep -Eq '^[[:alnum:]._:-]+$'; then
+            echo 'M1_API_UPSTREAM must be a host:port value without a scheme.' >&2
+            exit 1
+          fi
+
+      - name: Check Docker Desktop on M1
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker version
+          docker compose version
+
+      - name: Pull and restart UI on M1
+        env:
+          M1_API_UPSTREAM: ${{ secrets.M1_API_UPSTREAM }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+          IMAGE_REF: ${{ env.IMAGE_NAME }}:main
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/ace-step-forge"
+          cp deploy/m1/compose.yml "$HOME/ace-step-forge/compose.yml"
+
+          # Keep upstream and image values local to the runner; neither is
+          # printed to the Actions log.
+          printf 'FORGE_IMAGE=%s\nFORGE_API_UPSTREAM=%s\nFORGE_PORT=3003\n' "$IMAGE_REF" "$M1_API_UPSTREAM" > "$HOME/ace-step-forge/.env"
+          chmod 600 "$HOME/ace-step-forge/.env"
+
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
+          cd "$HOME/ace-step-forge"
+          docker compose config --quiet
+          docker compose pull
+          docker compose up -d --remove-orphans
+          docker logout ghcr.io >/dev/null 2>&1 || true
+
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3003/healthz >/dev/null; then
+              echo 'Forge UI is healthy on M1'
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose ps
+          exit 1

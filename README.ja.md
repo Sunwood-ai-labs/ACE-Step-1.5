@@ -75,6 +75,14 @@ docker compose ps
 `3000` が使用中なら、`.env` に `FORGE_PORT=3002` を設定してそのポートを開いてください。ブラウザ側は
 Forge の同一オリジン `/api` プロキシだけを使います。
 
+### Apple Silicon の M1 を UI エッジにする
+
+モデル/API イメージは CUDA/NVIDIA 前提のため、M1 では ARM64 の Forge UI だけを動かし、
+`/api` を Tailscale 経由で既存の GPU ホストへ転送します。
+[`deploy/m1/`](./deploy/m1/) の Compose と
+[GitHub Actions workflow](./.github/workflows/deploy-m1.yml) が、multi-arch イメージのビルドと
+M1 上の self-hosted runner で UI を更新します（初回の runner 登録は SSH で実施できます）。
+
 ### 12 GB GPU 向けの実用プロファイル
 
 Compose は `ACESTEP_GPU_DEVICE_ID` で指定した GPU だけを API と optional Gradio に見せます。
@@ -120,6 +128,7 @@ Tailnet URL はインターネットへの一般公開 URL ではありません
 - [Forge ワークスペース概要](./docs/ja/FORGE.md) — ルート、保存場所、API 境界
 - [MCP セットアップ](./docs/ja/MCP.md) — Claude Code、Codex、認証、Tailnet
 - [12 GB GPU 運用](./docs/ja/GPU_12GB.md) — UUID の選び方とプランナー設定
+- [M1 CI/CD デプロイ](./deploy/m1/README.md) — ARM64 UI、self-hosted runner、Tailscale API 接続
 - [React UI の設計・QA 契約](./docs/en/REACT_FORGE.md)
 - [公式 ACE-Step の導入・モデルガイド](./docs/ja/INSTALL.md)
 

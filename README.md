@@ -84,6 +84,14 @@ Open the workspace at <http://localhost:3000>. The local services are:
 If port `3000` is in use, set `FORGE_PORT=3002` in `.env` and open that port
 instead. The browser still talks only to Forge's same-origin `/api` proxy.
 
+### Apple Silicon M1 as a UI edge
+
+The model/API image is CUDA/NVIDIA-specific, so an M1 Mac should run the
+ARM64 Forge UI and proxy `/api` to an existing GPU host over Tailscale. The
+[`deploy/m1/`](./deploy/m1/) manifest and
+[GitHub Actions workflow](./.github/workflows/deploy-m1.yml) build the
+multi-arch UI image and deploy it on a labeled self-hosted runner on the Mac.
+
 ### A practical 12 GB GPU profile
 
 Compose intentionally exposes only the GPU named by `ACESTEP_GPU_DEVICE_ID` to
@@ -135,6 +143,7 @@ public Internet endpoint.
 - [Forge workspace overview](./docs/en/FORGE.md) — routes, storage, and the API boundary
 - [MCP setup](./docs/en/MCP.md) — Claude Code, Codex, auth, and Tailnet notes
 - [12 GB GPU operation](./docs/en/GPU_12GB.md) — stable UUID selection and the planner decision
+- [M1 CI/CD deployment](./deploy/m1/README.md) — ARM64 UI edge, self-hosted runner, and Tailscale API routing
 - [React UI design and QA contract](./docs/en/REACT_FORGE.md)
 - [Official ACE-Step installation and model guides](./docs/en/INSTALL.md)
 - [日本語ドキュメント](./docs/ja/FORGE.md)
