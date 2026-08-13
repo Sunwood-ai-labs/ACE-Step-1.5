@@ -1,6 +1,8 @@
 export type TaskType = "text2music" | "cover" | "repaint";
 export type TaskState = "queued" | "working" | "ready" | "failed";
 export type ServiceState = "checking" | "online" | "offline";
+export type VisualizerAspect = "landscape" | "portrait";
+export type VisualizerState = "rendering" | "ready" | "failed";
 
 export interface GenerationDraft {
   prompt: string;
@@ -39,6 +41,14 @@ export interface AudioResult {
   dit_model?: string;
 }
 
+export interface VisualizerAsset {
+  aspect: VisualizerAspect;
+  state: VisualizerState;
+  updated_at: number;
+  file?: string;
+  error?: string;
+}
+
 export interface GenerationTask {
   id: string;
   prompt: string;
@@ -48,6 +58,7 @@ export interface GenerationTask {
   queuePosition?: number;
   result?: AudioResult;
   error?: string;
+  visualizers?: VisualizerAsset[];
 }
 
 export interface ApiEnvelope<T> {
@@ -91,6 +102,7 @@ export interface ApiLibraryItem {
   task_type: TaskType;
   state: "ready";
   result: AudioResult;
+  visualizers?: VisualizerAsset[];
 }
 
 export interface ApiLibraryResponse {

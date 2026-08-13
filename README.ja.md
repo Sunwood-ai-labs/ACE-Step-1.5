@@ -28,13 +28,16 @@
 <sub>実際にローカルで動かした Forge で、共有 Library から再生を始めた状態のスクリーンショットです。</sub>
 
 ```text
-Forge で生成 ──► ACE-Step の生成キュー ──► 共有 Library ──► 再生 / ダウンロード
+Forge で生成 ──► ACE-Step の生成キュー ──► 共有 Library ──► 再生 / ダウンロード / ビジュアライザMP4
 Claude Code / Codex ───────────────────────► 同じキュー ────► 同じ Library
 ```
 
 - **Create** — プロンプトと生成コントロールを指定し、既存の ACE-Step API に送ります。
 - **Library** — 完成した音声は `gradio_outputs/forge-library` に残るため、ブラウザ 1 台だけの
   localStorage ではなく、Forge サービス全体で共有できます。
+- **Visualizer** — 完成した曲ごとに横長 16:9 / SNS向け縦長 9:16 を選び、曲名・生成情報・音に
+  同期する波形をまとめたローカル H.264/AAC MP4 を作成できます。外部の動画サービスへ音声を
+  アップロードしません。
 - **MCP** — Claude Code、Codex CLI などから、同じ生成キューを Streamable HTTP で使えます。
 - **Legacy Gradio** — 上流公式の Gradio UI も `legacy` Compose profile として残しています。
 

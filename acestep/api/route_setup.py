@@ -12,6 +12,7 @@ from starlette.datastructures import UploadFile as StarletteUploadFile
 from acestep.api.http.audio_route import register_audio_route
 from acestep.api.http.lora_routes import register_lora_routes
 from acestep.api.http.library_routes import register_library_routes
+from acestep.api.http.visualizer_routes import register_visualizer_routes
 from acestep.api.http.model_service_routes import register_model_service_routes
 from acestep.api.http.query_result_route import register_query_result_route
 from acestep.api.http.reinitialize_route import register_reinitialize_route
@@ -58,6 +59,7 @@ def configure_api_routes(
     runtime_append_jsonl: Callable[..., Any],
     create_sample: Callable[..., Any] = None,
     library_store: Any = None,
+    visualizer_service: Any = None,
 ) -> None:
     """Configure middleware, compatibility router, and all API route modules."""
 
@@ -139,7 +141,17 @@ def configure_api_routes(
         verify_token_from_request=verify_token_from_request,
         wrap_response=wrap_response,
         library_store=library_store,
+        visualizer_service=visualizer_service,
     )
+
+    if visualizer_service is not None:
+        register_visualizer_routes(
+            app=app,
+            verify_api_key=verify_api_key,
+            verify_token_from_request=verify_token_from_request,
+            wrap_response=wrap_response,
+            visualizer_service=visualizer_service,
+        )
 
     register_release_task_route(
         app=app,

@@ -108,6 +108,8 @@ function navEN() {
       text: 'Forge',
       items: [
         { text: 'Workspace overview', link: '/en/FORGE' },
+        { text: 'v0.1.0 release notes', link: '/en/releases/v0.1.0' },
+        { text: 'v0.1.0 walkthrough', link: '/en/guide/articles/ace-step-forge-v0-1-0' },
         { text: 'MCP setup', link: '/en/MCP' },
         { text: '12 GB GPU operation', link: '/en/GPU_12GB' },
         { text: 'React UI contract', link: '/en/REACT_FORGE' },
@@ -155,6 +157,8 @@ function sidebarEN() {
         text: 'Forge Workspace',
         items: [
           { text: 'Overview', link: '/en/FORGE' },
+          { text: 'v0.1.0 Release Notes', link: '/en/releases/v0.1.0' },
+          { text: 'v0.1.0 Walkthrough', link: '/en/guide/articles/ace-step-forge-v0-1-0' },
           { text: 'MCP Setup', link: '/en/MCP' },
           { text: '12 GB GPU Operation', link: '/en/GPU_12GB' },
           { text: 'React UI Contract', link: '/en/REACT_FORGE' },
@@ -306,6 +310,8 @@ function navJA() {
       text: 'Forge',
       items: [
         { text: 'ワークスペース概要', link: '/ja/FORGE' },
+        { text: 'v0.1.0 リリースノート', link: '/ja/releases/v0.1.0' },
+        { text: 'v0.1.0 walkthrough', link: '/ja/guide/articles/ace-step-forge-v0-1-0' },
         { text: 'MCP セットアップ', link: '/ja/MCP' },
         { text: '12 GB GPU 運用', link: '/ja/GPU_12GB' },
         { text: 'React UI 契約', link: '/en/REACT_FORGE' },
@@ -347,6 +353,8 @@ function sidebarJA() {
         text: 'Forge ワークスペース',
         items: [
           { text: '概要', link: '/ja/FORGE' },
+          { text: 'v0.1.0 リリースノート', link: '/ja/releases/v0.1.0' },
+          { text: 'v0.1.0 walkthrough', link: '/ja/guide/articles/ace-step-forge-v0-1-0' },
           { text: 'MCP セットアップ', link: '/ja/MCP' },
           { text: '12 GB GPU 運用', link: '/ja/GPU_12GB' },
           { text: 'React UI 契約', link: '/en/REACT_FORGE' },

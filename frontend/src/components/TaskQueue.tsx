@@ -1,17 +1,19 @@
 import { LoaderCircle, Trash2, TriangleAlert, Waves } from "lucide-react";
 import { AudioPreview } from "./AudioPreview";
+import { VisualizerPanel } from "./VisualizerPanel";
 import { useLocale } from "../i18n/LocaleProvider";
 import { getWorkspaceCopy } from "../i18n/workspaceCopy";
-import type { GenerationTask } from "../lib/types";
+import type { GenerationTask, VisualizerAspect } from "../lib/types";
 
 interface TaskQueueProps {
   tasks: GenerationTask[];
   onRemove: (taskId: string) => void;
   apiToken: string;
   compact?: boolean;
+  onCreateVisualizer?: (taskId: string, aspect: VisualizerAspect) => Promise<boolean>;
 }
 
-export function TaskQueue({ tasks, onRemove, apiToken, compact = false }: TaskQueueProps) {
+export function TaskQueue({ tasks, onRemove, apiToken, compact = false, onCreateVisualizer }: TaskQueueProps) {
   const { locale } = useLocale();
   const copy = getWorkspaceCopy(locale).task;
   if (tasks.length === 0) {
@@ -38,6 +40,7 @@ export function TaskQueue({ tasks, onRemove, apiToken, compact = false }: TaskQu
             <p className="task-meta">{copy.taskType[task.taskType]} · {new Intl.DateTimeFormat(copy.timeLocale, { hour: "2-digit", minute: "2-digit" }).format(task.createdAt)}</p>
             {task.error && <p className="task-error">{task.error}</p>}
             {task.result?.file && <AudioPreview file={task.result.file} apiToken={apiToken} />}
+            {!compact && task.state === "ready" && task.result?.file && onCreateVisualizer && <VisualizerPanel visualizers={task.visualizers ?? []} apiToken={apiToken} onCreate={(aspect) => onCreateVisualizer(task.id, aspect)} />}
           </div>
           <button className="icon-button subtle" type="button" onClick={() => void onRemove(task.id)} title={copy.remove} aria-label={copy.remove}>
             <Trash2 size={16} aria-hidden="true" />

@@ -24,7 +24,7 @@ not need a separate API origin or a CORS exception.
 | Route | What it is for |
 | --- | --- |
 | **Create** (`/`) | Start text, cover, or repaint generation using the existing ACE-Step API. |
-| **Library** (`/library`) | See the shared completed collection, play audio in the browser, download it, or remove a Library record. |
+| **Library** (`/library`) | See the shared completed collection, play audio in the browser, download it, create a 16:9 or social-first 9:16 audio-reactive MP4, or remove a Library record. |
 | **MCP** (`/mcp`) | Copy working Claude Code and Codex CLI setup commands; review the exposed tools and local-only security posture. |
 | **System** (`/system`) | Inspect service reachability and configure a browser-local API token when the underlying API requires one. |
 
@@ -34,6 +34,20 @@ When an API job succeeds, Forge stores the returned audio under
 `gradio_outputs/forge-library/audio` and writes its catalog under
 `gradio_outputs/forge-library`. The Library route reads that server-side catalog;
 it does not depend on one browser's local storage.
+
+## Create a visualizer video
+
+Each finished Library take has a **Visualizer video** panel. The default is a
+social-first portrait 9:16 cut; a landscape 16:9 cut is also available. Select
+**Create social video** and Forge runs one local FFmpeg render at a time. The
+resulting H.264/AAC MP4 combines the track title, generation metadata, a calm
+editorial frame, and an audio-reactive waveform, then is stored under
+`gradio_outputs/forge-library/visualizers/video`. The player and download link
+appear in the same Library card when rendering finishes.
+
+The visualizer is driven directly by the completed audio; it does not upload
+the track to an external video provider and does not consume the ACE-Step model
+GPU.
 
 This is why the end-to-end release check is important:
 

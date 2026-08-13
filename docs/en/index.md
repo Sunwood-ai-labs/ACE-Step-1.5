@@ -32,3 +32,9 @@ features:
 
 Start with the [Forge workspace overview](./FORGE), then follow the
 [MCP setup](./MCP) or [12 GB GPU operation guide](./GPU_12GB).
+
+## v0.1.0
+
+Read the [release notes](./releases/v0.1.0) and the
+[v0.1.0 walkthrough](./guide/articles/ace-step-forge-v0-1-0) for the verified
+generation → Library → visualizer path.

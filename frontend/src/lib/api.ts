@@ -7,6 +7,8 @@ import type {
   ApiTaskStatus,
   AudioResult,
   GenerationDraft,
+  VisualizerAspect,
+  VisualizerAsset,
 } from "./types";
 
 const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(/\/$/, "");
@@ -115,6 +117,14 @@ export async function deleteLibraryItem(itemId: string, apiToken: string): Promi
   await request<{ id: string; deleted: boolean }>(`/v1/library/${encodeURIComponent(itemId)}`, {
     method: "DELETE",
     headers: tokenHeaders(apiToken),
+  });
+}
+
+export async function createVisualizer(itemId: string, aspect: VisualizerAspect, apiToken: string): Promise<VisualizerAsset> {
+  return request<VisualizerAsset>(`/v1/library/${encodeURIComponent(itemId)}/visualizers`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...tokenHeaders(apiToken) },
+    body: JSON.stringify({ aspect }),
   });
 }
 

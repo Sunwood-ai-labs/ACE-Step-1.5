@@ -53,6 +53,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libsndfile1 \
         libsndfile1-dev \
         ffmpeg \
+        fonts-noto-cjk \
         # Python build deps
         libffi-dev \
         libssl-dev \

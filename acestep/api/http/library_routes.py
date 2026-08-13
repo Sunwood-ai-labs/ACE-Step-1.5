@@ -15,6 +15,7 @@ def register_library_routes(
     verify_token_from_request: Callable[[dict, Optional[str]], Optional[str]],
     wrap_response: Callable[..., Dict[str, Any]],
     library_store: Any,
+    visualizer_service: Any = None,
 ) -> None:
     """Register persistent library list, removal, and audio playback routes."""
 
@@ -22,7 +23,11 @@ def register_library_routes(
     async def list_library(limit: int = Query(default=60, ge=1, le=60)):
         """Return recent audio items shared by every Forge client."""
 
-        return wrap_response({"items": library_store.list_items(limit=limit)})
+        items = library_store.list_items(limit=limit)
+        if visualizer_service is not None:
+            for item in items:
+                item["visualizers"] = visualizer_service.list_for_item(item["id"])
+        return wrap_response({"items": items})
 
     @app.delete("/v1/library/{item_id}")
     async def delete_library_item(item_id: str, authorization: Optional[str] = Header(None)):
@@ -31,6 +36,8 @@ def register_library_routes(
         verify_token_from_request({}, authorization)
         if not library_store.remove(item_id):
             raise HTTPException(status_code=404, detail="Library item not found")
+        if visualizer_service is not None:
+            visualizer_service.remove_for_item(item_id)
         return wrap_response({"id": item_id, "deleted": True})
 
     @app.get("/v1/library/audio/{filename}")

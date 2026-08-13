@@ -35,3 +35,9 @@ Library に現れ、ブラウザのオーディオプレーヤーで再生され
 
 [Forge 概要](./FORGE)から始め、必要に応じて [MCP セットアップ](./MCP) や
 [12 GB GPU 運用](./GPU_12GB) を参照してください。
+
+## v0.1.0
+
+[リリースノート](./releases/v0.1.0) と
+[v0.1.0 walkthrough](./guide/articles/ace-step-forge-v0-1-0) で、生成から
+Library、ビジュアライザまでの検証済みフローを確認できます。

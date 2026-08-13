@@ -38,3 +38,8 @@ rock instrumental reached **Ready**, appeared in the shared Library, and was
 started through the browser audio player.
 
 [Read the Forge guide](./en/FORGE) · [日本語ガイド](./ja/FORGE)
+
+## v0.1.0
+
+The first public Forge release is documented in the [release notes](./en/releases/v0.1.0)
+and the [verified walkthrough](./en/guide/articles/ace-step-forge-v0-1-0).

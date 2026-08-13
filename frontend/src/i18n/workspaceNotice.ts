@@ -9,7 +9,10 @@ export type LocalizedNoticeKey =
   | "queued"
   | "submitFailed"
   | "removed"
-  | "removeFailed";
+  | "removeFailed"
+  | "visualizerQueued"
+  | "visualizerReady"
+  | "visualizerFailed";
 
 export type WorkspaceNotice =
   | { type: "localized"; key: LocalizedNoticeKey; position?: number }

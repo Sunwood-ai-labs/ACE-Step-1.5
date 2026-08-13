@@ -22,7 +22,7 @@ docker compose ps
 | 画面 | 役割 |
 | --- | --- |
 | **Create** (`/`) | 既存の ACE-Step API を使い、text / cover / repaint の生成を開始します。 |
-| **Library** (`/library`) | 完成した曲を共有コレクションで確認し、ブラウザで再生・ダウンロード、または Library レコードを削除します。 |
+| **Library** (`/library`) | 完成した曲を共有コレクションで確認し、ブラウザで再生・ダウンロード、横長 16:9 / SNS向け縦長 9:16 の音声同期MP4を作成、または Library レコードを削除します。 |
 | **MCP** (`/mcp`) | Claude Code / Codex のコマンド、公開ツール、localhost 専用のセキュリティ方針を確認します。 |
 | **System** (`/system`) | サービス到達性を確認し、API が必要な場合だけブラウザローカルのトークンを設定します。 |
 
@@ -31,6 +31,17 @@ docker compose ps
 API ジョブが成功すると、Forge は返却された音声を `gradio_outputs/forge-library/audio` にコピーし、
 カタログを `gradio_outputs/forge-library` に保存します。Library 画面はこのサーバー側カタログを読むため、
 ブラウザ 1 台の localStorage には依存しません。
+
+## ビジュアライザ動画を作る
+
+完成した Library の各曲には **ビジュアライザ動画** パネルがあります。既定はSNS向けの縦長 9:16で、
+横長 16:9 も選べます。**SNSビデオを作成** を押すと、Forge はローカルの FFmpeg で一度に1本だけ
+レンダリングします。完成した H.264/AAC MP4 は曲名・生成情報・落ち着いたエディトリアルフレーム・
+音に同期する波形をまとめ、`gradio_outputs/forge-library/visualizers/video` に保存します。完了すると、
+同じLibraryカードにプレーヤーとダウンロードリンクが表示されます。
+
+ビジュアライザは完成した音声から直接作られ、外部の動画サービスへ曲をアップロードしません。また、
+ACE-Step のモデル用 GPU も使用しません。
 
 リリース時には、次の順に実際に確認してください。
 

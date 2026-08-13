@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { audioUrl, deleteLibraryItem, getLibrary, getModels, parseResult, submitTask } from "./api";
+import { audioUrl, createVisualizer, deleteLibraryItem, getLibrary, getModels, parseResult, submitTask } from "./api";
 import { defaultDraft } from "./types";
 
 describe("ACE-Step API client", () => {
@@ -46,5 +46,15 @@ describe("ACE-Step API client", () => {
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toBe("/api/v1/library/job-1%3A0");
     expect(init).toMatchObject({ method: "DELETE", headers: { Authorization: "Bearer local-token" } });
+  });
+
+  it("queues a local visualizer against the shared Library item", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ data: { aspect: "portrait", state: "rendering", updated_at: 1 }, code: 202, error: null }), { status: 202 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(createVisualizer("job-1:0", "portrait", "local-token")).resolves.toMatchObject({ state: "rendering" });
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("/api/v1/library/job-1%3A0/visualizers");
+    expect(init).toMatchObject({ method: "POST", headers: { Authorization: "Bearer local-token" } });
+    expect(JSON.parse(init.body as string)).toEqual({ aspect: "portrait" });
   });
 });

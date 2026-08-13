@@ -261,8 +261,13 @@ docs/.vitepress/dist/
 docs/.vitepress/cache/
 web/
 output/
+.qa-*.png
 docs/en/awesome.md
 package-lock.json
 # The documentation site is an independently deployable Node project. Keep its
 # root lockfile under version control so GitHub Pages builds are reproducible.
 !/package-lock.json
+
+# Keep release QA inventories auditable in the repository.
+!tmp/
+!tmp/release-qa-*.md

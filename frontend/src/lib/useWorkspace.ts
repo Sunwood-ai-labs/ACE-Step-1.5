@@ -2,10 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "../i18n/LocaleProvider";
 import { formatWorkspaceNotice, type WorkspaceNotice } from "../i18n/workspaceNotice";
 import { getWorkspaceCopy } from "../i18n/workspaceCopy";
-import { ApiError, deleteLibraryItem, getHealth, getLibrary, getModels, queryTasks, submitTask } from "./api";
+import { ApiError, createVisualizer as requestVisualizer, deleteLibraryItem, getHealth, getLibrary, getModels, queryTasks, submitTask } from "./api";
 import { readSettings, readTasks, writeSettings, writeTasks } from "./storage";
-import { activeTasks, mergeSharedLibrary, taskFromLibrary } from "./workspaceTasks";
-import type { ApiHealth, GenerationDraft, GenerationTask, ServiceState, WorkspaceSettings } from "./types";
+import { activeTasks, mergeSharedLibrary, mergeVisualizer, taskFromLibrary } from "./workspaceTasks";
+import type { ApiHealth, GenerationDraft, GenerationTask, ServiceState, VisualizerAspect, WorkspaceSettings } from "./types";
 export function useWorkspace() {
   const { locale } = useLocale();
   const copy = useMemo(() => getWorkspaceCopy(locale), [locale]);
@@ -170,6 +170,19 @@ export function useWorkspace() {
     }
   }, [copy, settings.apiToken]);
 
+  const createVisualizer = useCallback(async (taskId: string, aspect: VisualizerAspect) => {
+    try {
+      const asset = await requestVisualizer(taskId, aspect, settings.apiToken);
+      setTasks((current) => current.map((task) => (task.id === taskId ? mergeVisualizer(task, asset) : task)));
+      setNoticeState({ type: "localized", key: asset.state === "ready" ? "visualizerReady" : "visualizerQueued" });
+      return true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : copy.notice.visualizerFailed;
+      setNoticeState(error instanceof Error ? { type: "message", message } : { type: "localized", key: "visualizerFailed" });
+      return false;
+    }
+  }, [copy, settings.apiToken]);
+
   const metrics = useMemo(
     () => ({
       active: activeTasks(tasks).length,
@@ -194,6 +207,7 @@ export function useWorkspace() {
     pollTasks,
     submit,
     removeTask,
+    createVisualizer,
   };
 }
 

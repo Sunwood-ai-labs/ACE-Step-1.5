@@ -31,7 +31,7 @@
 Forge makes the normal creative loop explicit:
 
 ```text
-Create in Forge ──► ACE-Step generation queue ──► shared Library ──► play / download
+Create in Forge ──► ACE-Step generation queue ──► shared Library ──► play / download / visualizer MP4
 Claude Code or Codex ───────────────────────────► same queue ─────► same Library
 ```
 
@@ -40,6 +40,10 @@ Claude Code or Codex ───────────────────�
 - **Library** — completed audio is copied to `gradio_outputs/forge-library`,
   so it is shared by the Forge service rather than remembered only by one
   browser.
+- **Visualizer** — choose a 16:9 or social-first 9:16 frame for a finished
+  take and Forge renders a local H.264/AAC MP4 with a title card, generation
+  details, and an audio-reactive waveform. It stays alongside the shared
+  Library assets; no audio is uploaded to an external video service.
 - **MCP** — Claude Code, Codex CLI, and compatible clients can call the same
   queue through a local Streamable HTTP endpoint.
 - **Legacy Gradio** — the official upstream Gradio UI remains available through
