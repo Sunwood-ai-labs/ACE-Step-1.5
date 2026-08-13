@@ -6,7 +6,7 @@
 - release tag: `v0.1.0`
 - compare range: `HEAD` (initial public release; no previous tag existed)
 - requested outputs: GitHub release body, English/Japanese release notes, English/Japanese walkthrough, release header image
-- release URLs: pending tag, Pages deployment, and GitHub release verification
+- release URLs: `https://github.com/Sunwood-ai-labs/ace-step-forge/releases/tag/v0.1.0`, `https://sunwood-ai-labs.github.io/ace-step-forge/en/releases/v0.1.0.html`, `https://sunwood-ai-labs.github.io/ace-step-forge/ja/releases/v0.1.0.html`
 
 ## Claim Matrix
 
@@ -50,11 +50,11 @@
 | latest_release_links_updated | not_applicable | No previous release existed and the repository had no latest-release landing pointer. |
 | svg_assets_validated | not_applicable | The requested release header is a committed PNG; no new SVG artwork is reused by this release. |
 | docs_assets_committed_before_tag | pass | Release pages, walkthroughs, nav links, and header PNG are included in the release commit before tag creation. |
-| docs_deployed_live | not_applicable | Pending the post-push GitHub Pages deployment check. |
-| tag_local_remote | not_applicable | Pending creation and remote verification of `v0.1.0`. |
-| github_release_verified | not_applicable | Pending publication and `gh release view` verification. |
+| docs_deployed_live | pass | GitHub Pages workflow `31677339809` completed successfully; English/Japanese release pages, walkthroughs, and the header PNG returned HTTP 200. |
+| tag_local_remote | pass | Annotated tag `v0.1.0` points at `fce9270afdf7328185493f942913f536d814c136` and is present on `origin`. |
+| github_release_verified | pass | `gh release view v0.1.0` returned a non-draft, non-prerelease release with the expected body and `ace-step-forge-v0.1.0-release-header.png` asset (SHA-256 `274680dd322cae6e29bfa589c9a8bc08e1dd896d488e5d3f044756b5ffcadcb4`). |
 | validation_commands_recorded | pass | Frontend tests/build, visualizer tests, Compose config, and VitePress build are recorded in the release pages and this inventory. |
-| publish_date_verified | not_applicable | Pending the published GitHub release timestamp. |
+| publish_date_verified | pass | GitHub reports `publishedAt=2026-08-13T07:23:28Z` for `v0.1.0`. |
 
 ## Validation Commands
 
@@ -70,4 +70,4 @@ npm.cmd run docs:build                                 # VitePress build passed
 
 - blockers:
 - waivers:
-- follow-up docs tasks: verify the live Pages URLs and GitHub release metadata after publication, then replace pending statuses above with the observed URLs and timestamp.
+- follow-up docs tasks:
