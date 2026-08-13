@@ -75,7 +75,7 @@ docker compose ps
 `3000` が使用中なら、`.env` に `FORGE_PORT=3002` を設定してそのポートを開いてください。ブラウザ側は
 Forge の同一オリジン `/api` プロキシだけを使います。
 
-### Apple Silicon の M1 を UI エッジにする
+### Apple Silicon の M1 で一式動かす
 
 M1 では ARM64 の Forge UI、Apple Silicon の MPS/MLX API、MCP、Library を
 同じ Mac 上で一式動かします。NVIDIA ホストへ処理を分離しません。

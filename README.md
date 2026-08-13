@@ -84,7 +84,7 @@ Open the workspace at <http://localhost:3000>. The local services are:
 If port `3000` is in use, set `FORGE_PORT=3002` in `.env` and open that port
 instead. The browser still talks only to Forge's same-origin `/api` proxy.
 
-### Apple Silicon M1 as a UI edge
+### Apple Silicon M1 all-in-one runtime
 
 The [`deploy/m1/`](./deploy/m1/) manifest and
 [GitHub Actions workflow](./.github/workflows/deploy-m1.yml) deploy the full
